@@ -1,0 +1,2938 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COSMOSIS - Explore the Infinite Universe</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        orbitron: ['Orbitron', 'sans-serif'],
+                    },
+                    colors: {
+                        space: {
+                            900: '#030712',
+                            950: '#000000',
+                        },
+                        twilight: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            800: '#1e293b',
+                            900: '#0f172a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- BoxIcons & Google Fonts -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;600;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.4);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 92, 246, 0.7);
+        }
+
+        .glass-panel {
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease;
+        }
+
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #f8fafc;
+        }
+
+        .light .glass-panel {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(99, 102, 241, 0.18);
+            box-shadow: 0 12px 35px -5px rgba(99, 102, 241, 0.12);
+            color: #0f172a;
+        }
+
+        @keyframes pulseGlow {
+
+            0%,
+            100% {
+                opacity: 0.4;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.8;
+                transform: scale(1.06);
+            }
+        }
+
+        .animate-pulse-glow {
+            animation: pulseGlow 7s ease-in-out infinite;
+        }
+
+        /* Toast Notification Styles */
+        #toastContainer {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 5000;
+            pointer-events: none;
+        }
+
+        .toast {
+            min-width: 280px;
+            padding: 14px 20px;
+            background: var(--dropdown-bg, #0f172a);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-left: 5px solid #8b5cf6;
+            border-radius: 14px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #f8fafc;
+            font-size: 14px;
+            font-weight: 600;
+            pointer-events: auto;
+            animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .toast.success {
+            border-left-color: #10b981;
+        }
+
+        .toast.error {
+            border-left-color: #ef4444;
+        }
+
+        .toast.info {
+            border-left-color: #3b82f6;
+        }
+
+        @keyframes slideInRight {
+            0% {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* Toggle Switch Button */
+        .theme-switch {
+            width: 50px;
+            height: 26px;
+            background: #cbd5e1;
+            border-radius: 30px;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 2px;
+            transition: background 0.4s ease;
+        }
+
+        .dark .theme-switch {
+            background: #8b5cf6;
+        }
+
+        .theme-switch .slider-btn {
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .dark .theme-switch .slider-btn {
+            transform: translateX(24px);
+            background: #0f172a;
+        }
+
+        /* Account Dropdown Styles */
+        .account-wrapper {
+            position: relative;
+        }
+
+        .account-profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 4px 12px 4px 4px;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 30px;
+            transition: all 0.3s;
+        }
+
+        .account-profile:hover {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .account-dropdown {
+            position: absolute;
+            top: 130%;
+            right: 0;
+            width: 260px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            padding: 14px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(15px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 1001;
+        }
+
+        .light .account-dropdown {
+            background: rgba(255, 255, 255, 0.96);
+            border-color: rgba(99, 102, 241, 0.25);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .account-wrapper:hover .account-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+
+        .dropdown-header {
+            padding: 8px 12px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 8px;
+        }
+
+        .light .dropdown-header {
+            border-bottom-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            color: inherit;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(139, 92, 246, 0.15);
+            color: #a855f7;
+            transform: translateX(4px);
+        }
+    </style>
+    <style id="fx-css">
+        /* ===== FX layer v2: replayable scroll reveal, 3D tab transition, 3D viewer, responsive polish ===== */
+        :root {
+            --fx-e: cubic-bezier(.16, 1, .3, 1)
+        }
+
+        html {
+            scroll-padding-top: 5rem;
+            -webkit-text-size-adjust: 100%
+        }
+
+        body {
+            min-height: 100vh !important
+        }
+
+        .fx-wait body {
+            opacity: 0
+        }
+
+        html:not(.fx-wait) body {
+            animation: fxFade .6s ease backwards
+        }
+
+        @keyframes fxFade {
+            from {
+                opacity: 0
+            }
+        }
+
+        body [data-fx]:not(.fx-in) {
+            opacity: 0;
+            translate: var(--fx-x, 0) var(--fx-y, 0);
+            scale: var(--fx-s, 1);
+            rotate: var(--fx-r, 0deg)
+        }
+
+        body [data-fx].fx-fade:not(.fx-in) {
+            translate: 0 0;
+            scale: 1;
+            rotate: 0deg
+        }
+
+        body [data-fx].fx-run {
+            transition: opacity var(--fx-t, .8s) var(--fx-e), translate var(--fx-t, .8s) var(--fx-e), scale var(--fx-t, .8s) var(--fx-e), rotate var(--fx-t, .8s) var(--fx-e);
+            transition-delay: var(--fx-d, 0s);
+            will-change: opacity, translate, scale, rotate
+        }
+
+        button:active {
+            scale: .97
+        }
+
+        .fx-bar {
+            position: fixed;
+            inset: 0 0 auto 0;
+            height: 3px;
+            z-index: 60;
+            transform-origin: 0 50%;
+            transform: scaleX(0);
+            background: linear-gradient(90deg, #8b5cf6, #38bdf8, #f472b6);
+            pointer-events: none
+        }
+
+        .fx-top {
+            position: fixed;
+            right: max(1rem, env(safe-area-inset-right));
+            bottom: max(1rem, env(safe-area-inset-bottom));
+            z-index: 60;
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            border: 1px solid rgba(167, 139, 250, .5);
+            background: rgba(15, 23, 42, .82);
+            color: #ddd6fe;
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            translate: 0 16px;
+            scale: .8;
+            pointer-events: none;
+            transition: opacity .4s, translate .5s var(--fx-e), scale .5s var(--fx-e), background-color .3s
+        }
+
+        .fx-top.on {
+            opacity: 1;
+            translate: 0 0;
+            scale: 1;
+            pointer-events: auto
+        }
+
+        .fx-top:hover {
+            background: rgba(124, 58, 237, .92)
+        }
+
+        .fx-tab-out {
+            animation: fxTabOut .26s ease-in both
+        }
+
+        .fx-tab-in {
+            animation: fxTabIn .8s var(--fx-e) both
+        }
+
+        @keyframes fxTabOut {
+            to {
+                opacity: 0;
+                transform: perspective(1200px) rotateX(9deg) translateY(-24px) scale(.97)
+            }
+        }
+
+        @keyframes fxTabIn {
+            from {
+                opacity: 0;
+                transform: perspective(1200px) rotateX(-14deg) translateY(36px) scale(.96)
+            }
+        }
+
+        .fx-3d {
+            position: fixed;
+            inset: 0;
+            z-index: 80;
+            display: grid;
+            place-items: center;
+            padding: max(.75rem, env(safe-area-inset-top)) max(.75rem, env(safe-area-inset-right)) max(.75rem, env(safe-area-inset-bottom)) max(.75rem, env(safe-area-inset-left));
+            background: rgba(2, 3, 8, .82);
+            backdrop-filter: blur(6px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .35s, visibility 0s .35s;
+            perspective: 1400px
+        }
+
+        .fx-3d.on {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity .35s
+        }
+
+        .fx-3d>div {
+            position: relative;
+            width: min(1100px, 100%);
+            height: min(760px, 100%);
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(167, 139, 250, .35);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, .6);
+            transform: rotateX(14deg) translateY(40px) scale(.92);
+            opacity: 0;
+            transition: transform .7s var(--fx-e), opacity .5s
+        }
+
+        .fx-3d.on>div {
+            transform: none;
+            opacity: 1
+        }
+
+        .fx-3d iframe {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border: 0;
+            background: #000
+        }
+
+        .fx-3d .fx-x {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 2;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, .3);
+            background: rgba(5, 6, 10, .7);
+            color: #fff;
+            font-size: 1.3rem;
+            line-height: 1;
+            cursor: pointer
+        }
+
+        @media(max-width:640px) {
+
+            input,
+            select,
+            textarea {
+                font-size: 16px !important
+            }
+
+            [class*="h-[260px]"] {
+                height: auto !important;
+                min-height: 260px
+            }
+
+            h1,
+            h2 {
+                overflow-wrap: anywhere
+            }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+            body [data-fx] {
+                opacity: 1 !important;
+                translate: none !important;
+                scale: none !important;
+                transition: none !important
+            }
+
+            html:not(.fx-wait) body {
+                animation: none
+            }
+
+            .fx-tab-in,
+            .fx-tab-out {
+                animation: none
+            }
+
+            .fx-3d>div {
+                transform: none
+            }
+
+            .fx-top,
+            .fx-bar {
+                transition: none
+            }
+        }
+    </style>
+    <style id="upgrade-css">
+        /* ===== UPGRADE LAYER: ISRO slider alignment, Google Translate cleanup, language select ===== */
+
+        /* ISRO slider: fixed thumb size so year labels sit exactly under the thumb centre */
+        #isroSlider {
+            --thumb: 22px;
+            --pos: 0;
+            --fill: calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--pos));
+            --track: rgba(15, 23, 42, .8);
+            -webkit-appearance: none;
+            appearance: none;
+            height: 12px;
+            margin: 0;
+            padding: 0;
+            border: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            outline: none;
+            border-radius: 9999px;
+        }
+
+        .light #isroSlider {
+            --track: #e2e8f0;
+        }
+
+        #isroSlider::-webkit-slider-runnable-track {
+            height: 12px;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, #8b5cf6, #6366f1) 0 0 / var(--fill) 100% no-repeat, var(--track);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, .35), 0 0 0 1px rgba(139, 92, 246, .3);
+        }
+
+        #isroSlider::-moz-range-track {
+            height: 12px;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, #8b5cf6, #6366f1) 0 0 / var(--fill) 100% no-repeat, var(--track);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, .35), 0 0 0 1px rgba(139, 92, 246, .3);
+        }
+
+        #isroSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            box-sizing: border-box;
+            width: var(--thumb);
+            height: var(--thumb);
+            margin-top: -5px;
+            border-radius: 50%;
+            background: #fff;
+            border: 4px solid #8b5cf6;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, .25), 0 2px 8px rgba(0, 0, 0, .45);
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        #isroSlider::-moz-range-thumb {
+            box-sizing: border-box;
+            width: var(--thumb);
+            height: var(--thumb);
+            border-radius: 50%;
+            background: #fff;
+            border: 4px solid #8b5cf6;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, .25), 0 2px 8px rgba(0, 0, 0, .45);
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        #isroSlider:active::-webkit-slider-thumb {
+            transform: scale(1.12);
+        }
+
+        #isroSlider:active::-moz-range-thumb {
+            transform: scale(1.12);
+        }
+
+        #isroSlider:focus-visible::-webkit-slider-thumb {
+            box-shadow: 0 0 0 6px rgba(139, 92, 246, .45), 0 2px 8px rgba(0, 0, 0, .45);
+        }
+
+        #isroSlider:focus-visible::-moz-range-thumb {
+            box-shadow: 0 0 0 6px rgba(139, 92, 246, .45), 0 2px 8px rgba(0, 0, 0, .45);
+        }
+
+        .isro-ticks {
+            --thumb: 22px;
+            position: relative;
+            height: 16px;
+        }
+
+        .isro-ticks span {
+            position: absolute;
+            top: 0;
+            left: calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--i) / 6);
+            transform: translateX(-50%);
+            white-space: nowrap;
+            transition: color .25s, transform .25s;
+        }
+
+        .isro-ticks span.is-active {
+            color: #a78bfa;
+            transform: translateX(-50%) scale(1.15);
+        }
+
+        .light .isro-ticks span.is-active {
+            color: #7c3aed;
+        }
+
+        /* Google Translate: keep its own UI hidden so the layout never shifts */
+        body {
+            top: 0 !important;
+        }
+
+        body>.skiptranslate,
+        iframe.skiptranslate,
+        .goog-te-banner-frame,
+        .goog-te-balloon-frame,
+        #goog-gt-tt,
+        .goog-tooltip,
+        .goog-te-spinner-pos {
+            display: none !important;
+        }
+
+        .goog-text-highlight,
+        font {
+            background: none !important;
+            box-shadow: none !important;
+        }
+
+        #google_translate_element {
+            position: fixed;
+            left: -9999px;
+            top: 0;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Language select (settings modal) */
+        .lang-select {
+            width: 100%;
+            padding: .625rem 2.25rem .625rem 1rem;
+            font-size: .75rem;
+            font-weight: 500;
+            border-radius: .75rem;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+            color: #f1f5f9;
+            border: 1px solid rgba(100, 116, 139, .5);
+            background: rgba(15, 23, 42, .6) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right .9rem center / 12px;
+            transition: border-color .2s;
+        }
+
+        .lang-select:hover,
+        .lang-select:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+
+        .lang-select option {
+            background: #0f172a;
+            color: #f8fafc;
+        }
+
+        .light .lang-select {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+
+        .light .lang-select option {
+            background: #fff;
+            color: #0f172a;
+        }
+    </style>
+    <script>if (!matchMedia("(prefers-reduced-motion:reduce)").matches) { document.documentElement.classList.add("fx-wait"); setTimeout(function () { document.documentElement.classList.remove("fx-wait") }, 2500) }</script>
+    <script src="script2.js"></script>
+    <script src="script3.js" defer></script>
+    <script src="https://cdn.botpress.cloud/webchat/v5.0/inject.js"></script>
+    <script src="https://files.bpcontent.cloud/2026/10/29/09/20261029093700-0PX2QJP3.js" defer></script>
+</head>
+
+<body class="bg-black text-slate-100 font-sans min-h-screen relative overflow-x-hidden transition-colors duration-500">
+
+    <!-- Starry & Particle Canvas Background -->
+    <canvas id="starCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+    <!-- Ambient Background Nebula Gradients -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-40 dark:opacity-30">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-purple-600 rounded-full blur-[120px] animate-pulse-glow">
+        </div>
+        <div class="absolute top-1/2 -right-40 w-96 h-96 bg-indigo-600 rounded-full blur-[140px] animate-pulse-glow"
+            style="animation-delay: 2s;"></div>
+        <div class="absolute -bottom-40 left-1/3 w-96 h-96 bg-blue-600 rounded-full blur-[160px] animate-pulse-glow"
+            style="animation-delay: 4s;"></div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer"></div>
+
+    <!-- Google Translate host (hidden; loaded on demand from Settings) -->
+    <div id="google_translate_element" aria-hidden="true"></div>
+
+    <!-- Startup Authentication Modal Overlay -->
+    <div id="authModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl transition-all duration-700">
+        <div
+            class="glass-panel w-full max-w-md rounded-3xl p-8 shadow-2xl transform transition-all duration-500 scale-100 border border-purple-500/30 relative overflow-hidden">
+            <div
+                class="absolute -top-24 -right-24 w-48 h-48 bg-purple-500/20 rounded-full blur-2xl pointer-events-none">
+            </div>
+
+            <div class="text-center mb-8">
+                <div
+                    class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-lg shadow-purple-500/30 mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                        </path>
+                    </svg>
+                </div>
+                <h1 translate="no"
+                    class="font-orbitron text-2xl font-bold tracking-wider dark:text-white text-slate-900">COSMOSIS</h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">Secure Orbital
+                    Portal</p>
+            </div>
+
+            <!-- Tab Switcher -->
+            <div
+                class="flex rounded-xl bg-slate-900/60 dark:bg-slate-900/60 light:bg-slate-200 p-1 mb-6 border border-white/5">
+                <button id="tabSignInBtn" onclick="switchAuthTab('signin')"
+                    class="flex-1 py-2.5 text-xs font-semibold rounded-lg transition-all duration-300 bg-purple-600 text-white shadow-md">Sign
+                    In</button>
+                <button id="tabSignUpBtn" onclick="switchAuthTab('signup')"
+                    class="flex-1 py-2.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all duration-300">Sign
+                    Up</button>
+            </div>
+
+            <!-- Form -->
+            <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div id="nameFieldContainer" class="hidden">
+                    <label class="block text-xs font-medium dark:text-slate-300 text-slate-700 mb-1">Astronaut
+                        Name</label>
+                    <input type="text" id="nameInput" placeholder="Commander Alex" name="name"
+                        class="w-full bg-slate-900/80 dark:bg-slate-900/80 light:bg-slate-100 border border-slate-700/60 light:border-slate-300 rounded-xl px-4 py-3 text-sm dark:text-white text-slate-900 focus:outline-none focus:border-purple-500 transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium dark:text-slate-300 text-slate-700 mb-1">Email or Cadet
+                        ID</label>
+                    <input type="email" id="emailInput" required placeholder="alex@cosmosis.space" name="email"
+                        class="w-full bg-slate-900/80 dark:bg-slate-900/80 light:bg-slate-100 border border-slate-700/60 light:border-slate-300 rounded-xl px-4 py-3 text-sm dark:text-white text-slate-900 focus:outline-none focus:border-purple-500 transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium dark:text-slate-300 text-slate-700 mb-1">Security Cipher
+                        (Password)</label>
+                    <input type="password" id="passInput" required placeholder="••••••••••••" name="password"
+                        class="w-full bg-slate-900/80 dark:bg-slate-900/80 light:bg-slate-100 border border-slate-700/60 light:border-slate-300 rounded-xl px-4 py-3 text-sm dark:text-white text-slate-900 focus:outline-none focus:border-purple-500 transition-colors">
+                </div>
+
+                <button type="submit" id="authSubmitBtn"
+                    class="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-purple-600/30 transition-all transform hover:-translate-y-0.5">
+                    Establish Connection
+                </button>
+            </form>
+
+            <div class="relative flex py-4 items-center">
+                <div class="flex-grow border-t border-slate-700/50 light:border-slate-300"></div>
+                <span class="flex-shrink mx-4 text-slate-500 text-[10px] uppercase tracking-widest">Or access
+                    orbit</span>
+                <div class="flex-grow border-t border-slate-700/50 light:border-slate-300"></div>
+            </div>
+
+            <!-- Guest Mode Button -->
+            <button onclick="continueAsGuest()"
+                class="w-full py-3 bg-slate-800/80 dark:bg-slate-800/80 light:bg-slate-200 hover:bg-slate-700/80 light:hover:bg-slate-300 dark:text-slate-200 text-slate-800 text-sm font-semibold rounded-xl border border-slate-700/50 light:border-slate-300 transition-all flex items-center justify-center space-x-2">
+                <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                <span>Continue as Guest</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Application Wrapper -->
+    <div id="mainApp"
+        class="opacity-0 pointer-events-none transition-opacity duration-1000 relative z-10 flex flex-col min-h-screen">
+
+        <!-- Sleek Glassmorphic Navbar -->
+        <header class="fixed top-0 left-0 right-0 z-40 px-4 sm:px-8 py-4">
+            <nav
+                class="max-w-7xl mx-auto glass-panel rounded-2xl px-6 py-3 flex items-center justify-between shadow-2xl">
+                <!-- Brand Logo -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('home')">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
+                        </svg>
+                    </div>
+                    <span translate="no"
+                        class="font-orbitron font-extrabold text-lg tracking-wider text-slate-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-white dark:via-slate-200 dark:to-purple-400">COSMOSIS</span>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <div
+                    class="hidden md:flex items-center space-x-1 bg-slate-900/40 dark:bg-slate-900/40 light:bg-slate-200 p-1 rounded-xl border border-white/5 light:border-slate-300">
+                    <button onclick="switchTab('home')" id="nav-home"
+                        class="nav-btn px-5 py-2 text-xs font-semibold rounded-lg transition-all duration-300 bg-purple-600 text-white shadow">Home</button>
+                    <button onclick="switchTab('discover')" id="nav-discover"
+                        class="nav-btn px-5 py-2 text-xs font-semibold rounded-lg dark:text-slate-300 light:text-slate-700 dark:hover:text-white light:hover:text-black dark:hover:bg-white/5 light:hover:bg-slate-300 transition-all duration-300">Discover</button>
+                    <button onclick="switchTab('missions')" id="nav-missions"
+                        class="nav-btn px-5 py-2 text-xs font-semibold rounded-lg dark:text-slate-300 light:text-slate-700 dark:hover:text-white light:hover:text-black dark:hover:bg-white/5 light:hover:bg-slate-300 transition-all duration-300">Missions</button>
+                    <button onclick="switchTab('community')" id="nav-community"
+                        class="nav-btn px-5 py-2 text-xs font-semibold rounded-lg dark:text-slate-300 light:text-slate-700 dark:hover:text-white light:hover:text-black dark:hover:bg-white/5 light:hover:bg-slate-300 transition-all duration-300">Community</button>
+                    <button onclick="switchTab('lab')" id="nav-lab"
+                        class="nav-btn px-5 py-2 text-xs font-semibold rounded-lg dark:text-slate-300 light:text-slate-700 dark:hover:text-white light:hover:text-black dark:hover:bg-white/5 light:hover:bg-slate-300 transition-all duration-300">Space Lab</button>
+                </div>
+
+                <!-- Right Tools -->
+                <div class="flex items-center space-x-3">
+                    <!-- Account Dropdown Widget -->
+                    <div class="account-wrapper">
+                        <div class="account-profile" id="accountProfileBtn">
+                            <div class="avatar" id="userAvatar">G</div>
+                            <span class="hidden sm:inline font-semibold text-xs pr-1" id="accountLabel"
+                                translate="no">Cadet</span>
+                            <i class='bx bx-chevron-down text-slate-400 text-sm'></i>
+                        </div>
+
+                        <div class="account-dropdown">
+                            <div class="dropdown-header">
+                                <h4 id="dropdownName" translate="no" class="font-bold text-sm">Commander Alex</h4>
+                                <p id="dropdownEmail" translate="no" class="text-[11px] text-slate-400 mt-0.5">
+                                    alex@cosmosis.space</p>
+                            </div>
+                            <a class="dropdown-item" onclick="logoutSession()">
+                                <i class='bx bx-log-out text-base text-rose-500'></i> Sign Out
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Settings Gear Trigger -->
+                    <button onclick="toggleSettingsModal()" aria-label="Open Settings"
+                        class="p-2.5 rounded-xl glass-panel hover:border-purple-500/50 dark:text-slate-300 light:text-slate-700 dark:hover:text-white light:hover:text-black transition-all transform hover:scale-105 active:scale-95">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                            </path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Toggle Switch Button -->
+                    <div class="theme-switch" id="themeToggle" onclick="toggleTheme()" title="Toggle Light/Dark Theme">
+                        <div class="slider-btn">
+                            <i class='bx bxs-sun' id="themeIcon" style="color: #f59e0b; font-size: 12px;"></i>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Menu Button -->
+                    <button onclick="toggleMobileMenu()"
+                        class="md:hidden p-2.5 rounded-xl glass-panel dark:text-slate-300 light:text-slate-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+
+            <!-- Mobile Navigation Drawer -->
+            <div id="mobileMenu"
+                class="hidden md:hidden max-w-7xl mx-auto mt-2 glass-panel rounded-2xl p-4 flex flex-col space-y-2 shadow-2xl">
+                <button onclick="switchTab('home'); toggleMobileMenu();"
+                    class="text-left px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-purple-600">Home</button>
+                <button onclick="switchTab('discover'); toggleMobileMenu();"
+                    class="text-left px-4 py-2.5 rounded-xl text-sm font-semibold dark:text-slate-300 light:text-slate-700 hover:bg-white/5">Discover</button>
+                <button onclick="switchTab('missions'); toggleMobileMenu();"
+                    class="text-left px-4 py-2.5 rounded-xl text-sm font-semibold dark:text-slate-300 light:text-slate-700 hover:bg-white/5">Missions</button>
+                <button onclick="switchTab('community'); toggleMobileMenu();"
+                    class="text-left px-4 py-2.5 rounded-xl text-sm font-semibold dark:text-slate-300 light:text-slate-700 hover:bg-white/5">Community</button>
+                <button onclick="switchTab('lab'); toggleMobileMenu();"
+                    class="text-left px-4 py-2.5 rounded-xl text-sm font-semibold dark:text-slate-300 light:text-slate-700 hover:bg-white/5">Space Lab</button>
+                <div
+                    class="pt-2 border-t border-white/10 light:border-slate-300 flex items-center justify-between px-2">
+                    <span class="text-xs font-mono text-purple-300 light:text-purple-700" id="mobileUserBadgeId">ID:
+                        Cadet</span>
+                    <button onclick="logoutSession()" class="text-xs text-rose-500 font-bold hover:underline">Sign
+                        Out</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Sections Container -->
+        <main class="flex-grow pt-28 pb-16 px-4 sm:px-8 max-w-7xl mx-auto w-full">
+
+            <!-- TAB 1: HOME SECTION (LANDING HERO + ISRO TIMELINE FEATURE 2) -->
+            <section id="section-home"
+                class="tab-section flex flex-col items-center justify-center min-h-[75vh] text-center">
+                <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 dark:text-purple-300 light:text-purple-700 text-xs font-semibold mb-6 shadow-inner animate-bounce"
+                    style="animation-duration: 3s;">
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.690h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.690l1.07-3.292z">
+                        </path>
+                    </svg>
+                    <span>Next-Gen Cosmic Intelligence Portal</span>
+                </div>
+
+                <h1
+                    class="font-orbitron text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-tight max-w-5xl mb-6 text-slate-900 dark:text-white">
+                    EXPLORE THE <span
+                        class="bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(168,85,247,0.4)]">INFINITE
+                        UNIVERSE</span>
+                </h1>
+
+                <p
+                    class="text-slate-600 dark:text-slate-300 text-base sm:text-lg max-w-2xl mb-10 font-normal leading-relaxed">
+                    Embark on an immersive voyage through distant galaxies, active stellar nurseries, and groundbreaking
+                    cosmic anomalies curated for modern stargazers.
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto mb-16">
+                    <a href="index2.html"><button
+                            class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-2xl shadow-xl shadow-purple-600/30 transition-all transform hover:-translate-y-1 flex items-center justify-center space-x-3">
+                            <span>View ISRO Projects</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </button></a>
+                    <a href="index7.html"><button
+                            class="w-full sm:w-auto px-8 py-4 glass-panel hover:bg-white/10 dark:hover:bg-white/10 light:hover:bg-slate-200 text-slate-800 dark:text-slate-200 font-semibold rounded-2xl transition-all transform hover:-translate-y-1">
+                            Play Educational Game
+                        </button>
+                    </a>
+                    <a href="index10.html"><button
+                            class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-2xl shadow-xl shadow-purple-600/30 transition-all transform hover:-translate-y-1 flex items-center justify-center space-x-3">
+                            <span>View Indian Space Journey</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </button></a>
+                </div>
+
+                <!-- FEATURE 2: Interactive ISRO Timeline with Volume/Slider Control -->
+                <div
+                    class="w-full max-w-4xl mx-auto glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden border border-purple-500/30 text-left mb-20 shadow-2xl">
+                    <div
+                        class="absolute -top-20 -right-20 w-48 h-48 bg-purple-600/20 rounded-full blur-3xl pointer-events-none">
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
+                        <div>
+                            <div
+                                class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 dark:text-indigo-300 light:text-indigo-700 text-[11px] font-semibold mb-2">
+                                <i class='bx bx-slider-alt'></i>
+                                <span>Spacecraft Control Console</span>
+                            </div>
+                            <h3 class="font-orbitron text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">ISRO
+                                Orbital Epoch Timeline</h3>
+                        </div>
+                        <div id="epochBadgeDisplay"
+                            class="px-4 py-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-orbitron font-extrabold text-sm shadow-lg shadow-purple-600/35">
+                            Epoch: 1963
+                        </div>
+                    </div>
+
+                    <!-- Custom Audio/Volume-Style Futuristic Slider -->
+                    <div class="space-y-4 mb-8">
+                        <div class="relative flex items-center">
+                            <input type="range" id="isroSlider" min="0" max="6" step="1" value="0"
+                                aria-label="ISRO timeline year" class="w-full cursor-pointer">
+                        </div>
+                        <!-- Milestone Tick Marks -->
+                        <div class="isro-ticks text-[10px] font-mono text-slate-500 dark:text-slate-400">
+                            <span class="cursor-pointer hover:text-purple-400 font-bold" style="--i:0"
+                                onclick="setEpochSlider(0)">1963</span>
+                            <span class="cursor-pointer hover:text-purple-400 font-bold" style="--i:1"
+                                onclick="setEpochSlider(1)">1975</span>
+                            <span class="cursor-pointer hover:text-purple-400 font-bold" style="--i:2"
+                                onclick="setEpochSlider(2)">2008</span>
+                            <span class="cursor-pointer hover:text-purple-400 font-bold" style="--i:3"
+                                onclick="setEpochSlider(3)">2013</span>
+                            <span class="cursor-pointer hover:text-purple-400 font-bold" style="--i:4"
+                                onclick="setEpochSlider(4)">2019</span>
+                            <span class="cursor-pointer hover:text-purple-400 font-bold" style="--i:5"
+                                onclick="setEpochSlider(5)">2023</span>
+                            <span class="cursor-pointer hover:text-purple-400 font-bold" style="--i:6"
+                                onclick="setEpochSlider(6)">2025/26</span>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Card Display with Fade-Up Animation -->
+                    <div id="isroCardContainer"
+                        class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center transition-all duration-500 transform opacity-0 translate-y-5">
+                        <div
+                            class="md:col-span-5 relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 group h-56">
+                            <img id="isroCardImg" src="" alt="ISRO Mission"
+                                class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-4">
+                                <span id="isroCardRocket"
+                                    class="px-3 py-1 rounded-full bg-purple-600/80 backdrop-blur-md text-white text-xs font-mono font-semibold"></span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-7 space-y-3">
+                            <div id="isroCardTag"
+                                class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-400 dark:text-purple-300 light:text-purple-700 text-xs font-bold">
+                            </div>
+                            <h4 id="isroCardTitle"
+                                class="font-orbitron text-xl font-bold text-slate-900 dark:text-white"></h4>
+                            <p id="isroCardHighlights"
+                                class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed"></p>
+                            <div
+                                class="pt-2 border-t border-slate-200 dark:border-white/10 flex items-center space-x-2">
+                                <i class='bx bx-award text-purple-500 text-base'></i>
+                                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Scientific
+                                    Impact:</span>
+                                <span id="isroCardImpact"
+                                    class="text-xs font-medium text-slate-800 dark:text-slate-200"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- See more projects (opens the Missions tab) -->
+                    <a href="index10.html">
+                        <div
+                            class="mt-6 pt-5 border-t border-slate-200 dark:border-white/10 flex justify-center sm:justify-end">
+                            <button type="button" id="seeMoreProjectsBtn"
+                                class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-purple-600/30 transition-all transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 flex items-center justify-center space-x-2">
+                                <span>See more projects</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-4xl">
+                    <div class="glass-panel p-6 rounded-2xl text-center">
+                        <div class="font-orbitron text-2xl sm:text-3xl font-bold text-purple-600 dark:text-purple-400">
+                            1969</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">Founding
+                            Year
+                        </div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-2xl text-center">
+                        <div class="font-orbitron text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+                            120<sup
+                                class="font-orbitron text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400">+</sup>
+                        </div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">Launch
+                            Mission</div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-2xl text-center">
+                        <div class="font-orbitron text-2xl sm:text-3xl font-bold text-cyan-600 dark:text-cyan-400">
+                            100<sup
+                                class="font-orbitron text-2xl sm:text-3xl font-bold text-cyan-600 dark:text-cyan-400">+</sup>
+                        </div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">Space
+                            Startups</div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-2xl text-center">
+                        <div class="font-orbitron text-2xl sm:text-3xl font-bold text-pink-600 dark:text-pink-400">85%
+                        </div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">Success
+                            Rate
+                            Void</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: DISCOVER SECTION -->
+            <section id="section-discover" class="tab-section hidden py-10">
+                <div class="text-center mb-12">
+                    <h2 class="font-orbitron text-3xl sm:text-4xl font-bold mb-3 text-slate-900 dark:text-white">Cosmic
+                        Discoveries</h2>
+                    <p class="text-slate-600 dark:text-slate-400 max-w-xl mx-auto text-sm">Unlocking the deepest
+                        mysteries of space-time and stellar evolution.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div
+                        class="glass-panel rounded-2xl p-6 hover:border-purple-500/50 transition-all duration-300 group">
+                        <div
+                            class="w-12 h-12 rounded-xl bg-purple-600/20 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z">
+                                </path>
+                            </svg>
+                        </div>
+                        <h3 class="font-orbitron text-lg font-bold mb-2 text-slate-900 dark:text-white">Rocket Designs
+                        </h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">Investigate the wonderful
+                            cost-effcient rockets and their achivement</p>
+                    </div>
+
+                    <div
+                        class="glass-panel rounded-2xl p-6 hover:border-indigo-500/50 transition-all duration-300 group">
+                        <div
+                            class="w-12 h-12 rounded-xl bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                        </div>
+                        <h3 class="font-orbitron text-lg font-bold mb-2 text-slate-900 dark:text-white">Discoveries made
+                            by India</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">India's contributions to
+                            space exploration and astronomical research.</p>
+                    </div>
+
+                    <div class="glass-panel rounded-2xl p-6 hover:border-cyan-500/50 transition-all duration-300 group">
+                        <div
+                            class="w-12 h-12 rounded-xl bg-cyan-600/20 text-cyan-600 dark:text-cyan-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
+                                </path>
+                            </svg>
+                        </div>
+                        <h3 class="font-orbitron text-lg font-bold mb-2 text-slate-900 dark:text-white">Discover the
+                            online ISRO Laboratory </h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">The mysterious repulsive
+                            force accelerating the expansion of the cosmos across vast intergalactic scales.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: MISSIONS SECTION -->
+            <section id="section-missions" class="tab-section hidden py-10">
+                <div class="text-center mb-12">
+                    <h2 class="font-orbitron text-3xl sm:text-4xl font-bold mb-3 text-slate-900 dark:text-white">Active
+                        Missions</h2>
+                    <p class="text-slate-600 dark:text-slate-400 max-w-xl mx-auto text-sm">Tracking humanity's greatest
+                        robotic and crewed voyages into the deep unknown.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <a href="index9.html">
+                        <div class="glass-panel rounded-2xl p-6 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <span
+                                        class="px-3 py-1 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold rounded-full border border-emerald-500/30">Active
+                                        in LEO(Low Earth Orbit)</span>
+                                    <span class="text-xs font-mono text-slate-500 dark:text-slate-400">CMOI-2026</span>
+                                </div>
+                                <h3 class="font-orbitron text-xl font-bold mb-2 text-slate-900 dark:text-white">Mission
+                                    Drishti
+                                </h3>
+                                <p class="text-slate-600 dark:text-slate-400 text-sm mb-6 leading-relaxed">The
+                                    world's first commercial satellite to combine both Synthetic Aperture Radar (SAR)
+                                    and Electro-Optical (EO) multispectral sensors on a single platform.
+                                </p>
+                            </div>
+                            <div
+                                class="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-white/10 text-xs text-slate-500 dark:text-slate-400">
+                                <span>Status: Operational</span>
+                                <span class="text-purple-600 dark:text-purple-400 font-semibold">500 km from
+                                    Earth</span>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="index8.html">
+                        <div class="glass-panel rounded-2xl p-6 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <span
+                                        class="px-3 py-1 bg-purple-500/20 text-purple-600 dark:text-purple-400 text-xs font-semibold rounded-full border border-purple-500/30">Lunar
+                                        Gateway</span>
+                                    <span class="text-xs font-mono text-slate-500 dark:text-slate-400">NavIc </span>
+                                </div>
+                                <h3 class="font-orbitron text-xl font-bold mb-2 text-slate-900 dark:text-white">Low
+                                    NavIc Satellite Earth Orbit Mission</h3>
+                                <p class="text-slate-600 dark:text-slate-400 text-sm mb-6 leading-relaxed">India's
+                                    independent regional satellite navigation system development by the India Space
+                                    Reasearch
+                                    Organisation(ISRO).
+                                </p>
+                            </div>
+                            <div
+                                class="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-white/10 text-xs text-slate-500 dark:text-slate-400">
+                                <span>Status: Launched Prep</span>
+                                <span class="text-indigo-600 dark:text-indigo-400 font-semibold">Scheduled July 1
+                                    2013</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- TAB 4: COMMUNITY SECTION -->
+            <section id="section-community" class="tab-section hidden py-10">
+                <div class="text-center mb-12">
+                    <h2 class="font-orbitron text-3xl sm:text-4xl font-bold mb-3 text-slate-900 dark:text-white">
+                        Stargazer Community</h2>
+                    <p class="text-slate-600 dark:text-slate-400 max-w-xl mx-auto text-sm">Connect with fellow cadets
+                        and share orbital dispatch observations.</p>
+                </div>
+
+                <div class="max-w-3xl mx-auto glass-panel rounded-3xl p-6 sm:p-8">
+                    <h3 class="font-orbitron text-lg font-bold mb-4 text-slate-900 dark:text-white">Post an Orbital
+                        Transmission</h3>
+                    <form onsubmit="handlePostDispatch(event)" class="space-y-4 mb-8">
+                        <textarea id="dispatchText" required rows="3"
+                            placeholder="Share your telescope coordinates or cosmic thought..."
+                            class="w-full bg-slate-900/40 dark:bg-slate-900/40 light:bg-slate-100 border border-slate-700/60 light:border-slate-300 rounded-2xl p-4 text-sm text-slate-800 dark:text-white focus:outline-none focus:border-purple-500 transition-colors"></textarea>
+                        <div class="flex justify-end">
+                            <button type="submit"
+                                class="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-purple-600/30 transition-all">Transmit
+                                Message</button>
+                        </div>
+                    </form>
+
+                    <div class="border-t border-slate-200 dark:border-white/10 pt-6">
+                        <h4 class="font-orbitron text-sm font-semibold mb-4 text-slate-700 dark:text-slate-300">Recent
+                            Dispatches</h4>
+                        <div id="dispatchesList" class="space-y-4">
+                            <!-- Injected dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Developer Section -->
+                    <div class="border-t border-slate-200 dark:border-white/10 pt-6 mt-8">
+                        <h4 class="font-orbitron text-sm font-semibold mb-4 text-slate-700 dark:text-slate-300">Lead
+                            Orbital Developer</h4>
+                        <div
+                            class="p-4 rounded-2xl bg-slate-900/30 dark:bg-slate-900/30 light:bg-slate-100 border border-purple-500/30 flex items-center space-x-4">
+                            <div
+                                class="w-12 h-12 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-base shadow-lg shadow-purple-500/30 flex-shrink-0">
+                                DV
+                            </div>
+                            <div>
+                                <h5 class="font-orbitron text-sm font-bold text-slate-900 dark:text-white">Aradhy
+                                    Kushwaha</h5>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Lead Systems Architect &
+                                    Full-Stack Engineer</p>
+                                <div class="flex items-center space-x-3 mt-2">
+                                    <span
+                                        class="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-600 dark:text-purple-300 font-mono">v2.6.0
+                                        Stable</span>
+                                    <span class="text-[10px] text-slate-400">Cosmosis Core Systems</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-200 dark:border-white/10 pt-6 mt-8">
+                        <h4 class="font-orbitron text-sm font-semibold mb-4 text-slate-700 dark:text-slate-300">Lead
+                            Orbital Editor</h4>
+                        <div
+                            class="p-4 rounded-2xl bg-slate-900/30 dark:bg-slate-900/30 light:bg-slate-100 border border-purple-500/30 flex items-center space-x-4">
+                            <div
+                                class="w-12 h-12 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-base shadow-lg shadow-purple-500/30 flex-shrink-0">
+                                ED
+                            </div>
+                            <div>
+                                <h5 class="font-orbitron text-sm font-bold text-slate-900 dark:text-white">Akshat Singh
+                                    Sengar</h5>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Lead AI Architect & Video
+                                    Editor</p>
+                                <div class="flex items-center space-x-3 mt-2">
+                                    <span
+                                        class="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-600 dark:text-purple-300 font-mono">v2.6.0
+                                        Stable</span>
+                                    <span class="text-[10px] text-slate-400">Cosmosis Core Systems</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-200 dark:border-white/10 pt-6 mt-8">
+                        <h4 class="font-orbitron text-sm font-semibold mb-4 text-slate-700 dark:text-slate-300">Lead
+                            Orbital Content Creator/Writer</h4>
+                        <div
+                            class="p-4 rounded-2xl bg-slate-900/30 dark:bg-slate-900/30 light:bg-slate-100 border border-purple-500/30 flex items-center space-x-4">
+                            <div
+                                class="w-12 h-12 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-base shadow-lg shadow-purple-500/30 flex-shrink-0">
+                                CW
+                            </div>
+                            <div>
+                                <h5 class="font-orbitron text-sm font-bold text-slate-900 dark:text-white">Lavish</h5>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Lead Content Creator/Writer
+                                </p>
+                                <div class="flex items-center space-x-3 mt-2">
+                                    <span
+                                        class="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-600 dark:text-purple-300 font-mono">v2.6.0
+                                        Stable</span>
+                                    <span class="text-[10px] text-slate-400">Cosmosis Core Systems</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- TAB 5: SPACE LAB (new) -->
+            <section id="section-lab" class="tab-section hidden py-10">
+                <style>
+                    .lab-in{width:100%;padding:.6rem .8rem;border-radius:.75rem;font-size:.85rem;font-weight:600;outline:none;background:rgba(15,23,42,.55);color:#e2e8f0;border:1px solid rgba(255,255,255,.14);transition:border-color .25s,box-shadow .25s}
+                    .lab-in:focus{border-color:#a78bfa;box-shadow:0 0 0 3px rgba(167,139,250,.25)}
+                    html.light .lab-in{background:#fff;color:#0f172a;border-color:#cbd5e1}
+                    .lab-chip{padding:.35rem .75rem;border-radius:9999px;font-size:.7rem;font-weight:700;cursor:pointer;background:rgba(139,92,246,.18);border:1px solid rgba(139,92,246,.45);color:inherit;transition:transform .25s,background .25s}
+                    .lab-chip:hover{background:rgba(139,92,246,.4);transform:translateY(-2px)}
+                    .lab-bar{height:.55rem;border-radius:9999px;background:rgba(148,163,184,.22);overflow:hidden}
+                    .lab-bar>i{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,#8b5cf6,#22d3ee);transition:width 1s cubic-bezier(.16,1,.3,1)}
+                    .lab-row{animation:labIn .7s cubic-bezier(.16,1,.3,1) backwards;animation-delay:calc(var(--i,0)*60ms)}
+                    @keyframes labIn{from{opacity:0;transform:translateX(-24px)}}
+                    .lab-track{position:relative;height:2.2rem;border-radius:9999px;overflow:hidden;background:linear-gradient(90deg,rgba(34,211,238,.12),rgba(139,92,246,.18));border:1px solid rgba(148,163,184,.25)}
+                    .lab-pulse{position:absolute;top:50%;left:0;width:.9rem;height:.9rem;margin-top:-.45rem;border-radius:50%;background:#fde68a;box-shadow:0 0 14px 4px rgba(250,204,21,.8)}
+                    .lab-pulse.go{animation:labTravel var(--dur,3s) linear infinite}
+                    @keyframes labTravel{from{left:0}to{left:calc(100% - .9rem)}}
+                    .lab-rk{position:absolute;left:50%;font-size:1.8rem;transform:translateX(-50%);transition:bottom 1.4s cubic-bezier(.16,1,.3,1)}
+                    .lab-sky{position:relative;height:9rem;border-radius:1rem;overflow:hidden;background:linear-gradient(0deg,rgba(34,211,238,.22),rgba(15,10,40,.55) 55%,rgba(2,0,12,.8));border:1px solid rgba(148,163,184,.25)}
+                    .lab-btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1.1rem;border-radius:.75rem;font-size:.8rem;font-weight:700;color:#fff;cursor:pointer;border:0;background:linear-gradient(90deg,#7c3aed,#06b6d4);box-shadow:0 6px 18px rgba(124,58,237,.35);transition:transform .25s,box-shadow .25s,opacity .25s}
+                    .lab-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 24px rgba(124,58,237,.5)}
+                    .lab-btn:disabled{opacity:.55;cursor:not-allowed}
+                    .lab-range{width:100%;accent-color:#8b5cf6;cursor:pointer}
+                    .lab-stat{border-radius:.75rem;padding:.6rem .4rem;text-align:center;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3)}
+                    .lab-stat small{display:block;font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8}
+                    .lab-stat b{font-family:Orbitron,sans-serif;font-size:.95rem;color:#7c3aed}
+                    html.dark .lab-stat b,.dark .lab-stat b{color:#c4b5fd}
+                    .lab-orbit-svg{width:100%;max-width:15rem;margin:0 auto;display:block;overflow:visible}
+                    .lab-spin{transform-origin:100px 100px;animation:labSpin var(--dur,6s) linear infinite}
+                    @keyframes labSpin{to{transform:rotate(360deg)}}
+                    .lab-cd{font-family:Orbitron,sans-serif;font-weight:800;font-size:1.6rem;text-align:center;letter-spacing:.05em;color:#7c3aed}
+                    .dark .lab-cd{color:#c4b5fd}
+                    .lab-ev{display:flex;gap:.5rem;font-size:.72rem;padding:.3rem 0;border-bottom:1px dashed rgba(148,163,184,.25);animation:labIn .5s cubic-bezier(.16,1,.3,1) backwards}
+                    .lab-ev b{font-family:Orbitron,sans-serif;min-width:3.4rem;color:#06b6d4}
+                    .lab-opt{display:block;width:100%;text-align:left;padding:.6rem .8rem;margin-bottom:.5rem;border-radius:.75rem;font-size:.8rem;font-weight:600;cursor:pointer;color:inherit;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.35);transition:transform .2s,background .2s,border-color .2s}
+                    .lab-opt:hover:not(:disabled){background:rgba(139,92,246,.28);transform:translateX(4px)}
+                    .lab-opt:disabled{cursor:default}
+                    .lab-opt.ok{background:rgba(16,185,129,.25);border-color:#10b981}
+                    .lab-opt.bad{background:rgba(244,63,94,.22);border-color:#f43f5e}
+                    .lab-moon{width:9rem;height:9rem;margin:0 auto .75rem;display:block;filter:drop-shadow(0 0 14px rgba(226,232,240,.35))}
+                    @media (prefers-reduced-motion:reduce){.lab-row,.lab-pulse.go,.lab-spin,.lab-ev{animation:none}.lab-bar>i,.lab-rk,.lab-opt{transition:none}}
+                </style>
+                <div class="text-center mb-12">
+                    <h2 class="font-orbitron text-3xl sm:text-4xl font-bold mb-3 text-slate-900 dark:text-white">Space Lab</h2>
+                    <p class="text-slate-600 dark:text-slate-400 max-w-xl mx-auto text-sm">Nine hands-on tools: weigh yourself on other worlds, time a radio signal, test a rocket, fly an orbit, run a launch, check your age on other planets, plan a trip, see tonight's Moon and take a quiz.</p>
+                </div>
+
+                <div class="grid gap-6 lg:grid-cols-3">
+                    <!-- Tool 1: weight on other worlds -->
+                    <div class="glass-panel p-6 rounded-2xl">
+                        <div class="text-2xl mb-1">⚖️</div>
+                        <h3 class="font-orbitron font-bold text-lg mb-1 text-slate-900 dark:text-white">Weight on Other Worlds</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Your mass stays the same. How heavy you feel depends on surface gravity.</p>
+                        <label class="text-[11px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400" for="labKg">Your mass (kg)</label>
+                        <input id="labKg" type="number" min="1" max="500" value="60" class="lab-in mt-1 mb-4">
+                        <div id="labWeights" class="space-y-3"></div>
+                    </div>
+
+                    <!-- Tool 2: signal delay -->
+                    <div class="glass-panel p-6 rounded-2xl">
+                        <div class="text-2xl mb-1">📡</div>
+                        <h3 class="font-orbitron font-bold text-lg mb-1 text-slate-900 dark:text-white">Signal Delay</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Radio waves travel at the speed of light. See how long a command takes to reach a target.</p>
+                        <label class="text-[11px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400" for="labTarget">Destination</label>
+                        <select id="labTarget" class="lab-in mt-1 mb-4">
+                            <option value="384400">Moon (Chandrayaan-3), 384,400 km</option>
+                            <option value="1500000">Sun-Earth L1 (Aditya-L1), 1.5 million km</option>
+                            <option value="149600000">The Sun, 149.6 million km</option>
+                            <option value="225000000" selected>Mars (avg. distance), 225 million km</option>
+                            <option value="778500000">Jupiter (avg. distance), 778.5 million km</option>
+                        </select>
+                        <div class="lab-track mb-4"><span id="labPulse" class="lab-pulse"></span></div>
+                        <div class="grid grid-cols-2 gap-3 text-center">
+                            <div class="rounded-xl p-3 bg-purple-500/10 border border-purple-500/30">
+                                <div class="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400">One way</div>
+                                <div id="labOne" class="font-orbitron font-bold text-lg text-purple-600 dark:text-purple-300">-</div>
+                            </div>
+                            <div class="rounded-xl p-3 bg-cyan-500/10 border border-cyan-500/30">
+                                <div class="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400">Round trip</div>
+                                <div id="labRound" class="font-orbitron font-bold text-lg text-cyan-600 dark:text-cyan-300">-</div>
+                            </div>
+                        </div>
+                        <p id="labNote" class="text-xs text-slate-500 dark:text-slate-400 mt-4"></p>
+                    </div>
+
+                    <!-- Tool 3: rocket equation -->
+                    <div class="glass-panel p-6 rounded-2xl">
+                        <div class="text-2xl mb-1">🚀</div>
+                        <h3 class="font-orbitron font-bold text-lg mb-1 text-slate-900 dark:text-white">Rocket Power Test</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Tsiolkovsky's rocket equation: Δv = Isp × g₀ × ln(wet mass ÷ dry mass).</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <button type="button" class="lab-chip" data-p="250,100,12">Solid motor</button>
+                            <button type="button" class="lab-chip" data-p="310,100,10">Kerosene</button>
+                            <button type="button" class="lab-chip" data-p="450,100,12">Hydrogen</button>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3 mb-4">
+                            <div><label class="text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400" for="labIsp">Isp (s)</label><input id="labIsp" type="number" min="50" max="500" value="310" class="lab-in mt-1"></div>
+                            <div><label class="text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400" for="labWet">Wet (t)</label><input id="labWet" type="number" min="1" value="100" class="lab-in mt-1"></div>
+                            <div><label class="text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400" for="labDry">Dry (t)</label><input id="labDry" type="number" min="0.1" step="0.1" value="10" class="lab-in mt-1"></div>
+                        </div>
+                        <div class="lab-sky mb-4"><span id="labRk" class="lab-rk" style="bottom:4%">🚀</span></div>
+                        <div class="flex items-end justify-between mb-1">
+                            <span class="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400">Delta-v</span>
+                            <span class="font-orbitron font-bold text-xl text-purple-600 dark:text-purple-300"><span id="labDv">0.00</span> km/s</span>
+                        </div>
+                        <div class="lab-bar"><i id="labDvBar"></i></div>
+                        <p id="labVerdict" class="text-xs mt-3 font-semibold text-slate-700 dark:text-slate-200"></p>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-2">Low Earth orbit needs roughly 9.4 km/s including drag and gravity losses. Real rockets use several stages.</p>
+                    </div>
+
+                    <!-- Tool 4: orbit explorer -->
+                    <div class="glass-panel p-6 rounded-2xl">
+                        <div class="text-2xl mb-1">🛰️</div>
+                        <h3 class="font-orbitron font-bold text-lg mb-1 text-slate-900 dark:text-white">Orbit Explorer</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Pick an altitude. The higher the satellite, the slower it moves and the longer one lap takes.</p>
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            <button type="button" class="lab-chip" data-alt="408">ISS</button>
+                            <button type="button" class="lab-chip" data-alt="20200">GPS-class</button>
+                            <button type="button" class="lab-chip" data-alt="35786">Geostationary</button>
+                        </div>
+                        <svg class="lab-orbit-svg mb-3" viewBox="0 0 200 200" role="img" aria-label="Satellite orbiting Earth">
+                            <circle id="labOrbRing" cx="100" cy="100" r="40" fill="none" stroke="rgba(148,163,184,.55)" stroke-dasharray="3 4"></circle>
+                            <circle cx="100" cy="100" r="22" fill="#2563eb"></circle>
+                            <path d="M86 94c6-8 14-6 18-1s9 3 12 8c-3 9-10 14-18 14-6-6-10-14-12-21z" fill="#22c55e" opacity=".85"></path>
+                            <g id="labOrbSpin" class="lab-spin"><circle id="labOrbSat" cx="140" cy="100" r="4.5" fill="#fde68a" style="filter:drop-shadow(0 0 5px #facc15)"></circle></g>
+                        </svg>
+                        <label class="text-[11px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400" for="labAlt">Altitude: <span id="labAltTxt" class="font-orbitron">408 km</span></label>
+                        <input id="labAlt" type="range" min="0" max="1000" value="131" class="lab-range mt-1 mb-3">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="lab-stat"><small>Speed</small><b id="labOrbV">-</b></div>
+                            <div class="lab-stat"><small>One lap</small><b id="labOrbT">-</b></div>
+                        </div>
+                        <p id="labOrbNote" class="text-xs text-slate-500 dark:text-slate-400 mt-3"></p>
+                    </div>
+
+                    <!-- Tool 5: launch simulator -->
+                    <div class="glass-panel p-6 rounded-2xl">
+                        <div class="text-2xl mb-1">🔥</div>
+                        <h3 class="font-orbitron font-bold text-lg mb-1 text-slate-900 dark:text-white">Launch Simulator</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Choose an Indian launch vehicle and run the countdown. Numbers are simplified, not real telemetry.</p>
+                        <select id="labVeh" class="lab-in mb-3" aria-label="Launch vehicle">
+                            <option value="pslv">PSLV · 4 stages (solid-liquid-solid-liquid)</option>
+                            <option value="lvm3">LVM3 · 2 solid boosters + liquid core + cryogenic</option>
+                            <option value="sslv">SSLV · 3 solid stages</option>
+                        </select>
+                        <div class="lab-sky mb-3"><span id="labLRk" class="lab-rk" style="bottom:4%;transition:none">🚀</span></div>
+                        <div id="labCd" class="lab-cd mb-3">READY</div>
+                        <div class="grid grid-cols-3 gap-2 mb-3">
+                            <div class="lab-stat"><small>T+</small><b id="labLT">00:00</b></div>
+                            <div class="lab-stat"><small>Altitude</small><b id="labLA">0 km</b></div>
+                            <div class="lab-stat"><small>Speed</small><b id="labLV">0.0 km/s</b></div>
+                        </div>
+                        <button id="labGo" type="button" class="lab-btn w-full mb-3">Start countdown</button>
+                        <div id="labEvents" aria-live="polite"></div>
+                    </div>
+
+                    <!-- Tool 6: age on other planets -->
+                    <div class="glass-panel p-6 rounded-2xl">
+                        <div class="text-2xl mb-1">🎂</div>
+                        <h3 class="font-orbitron font-bold text-lg mb-1 text-slate-900 dark:text-white">Age on Other Planets</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">A planet's year is how long it takes to circle the Sun, so your age changes from world to world.</p>
+                        <label class="text-[11px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400" for="labAge">Your age (Earth years)</label>
+                        <input id="labAge" type="number" min="0" max="120" step="0.1" value="20" class="lab-in mt-1 mb-4">
+                        <div id="labAges" class="space-y-2"></div>
+                        <p id="labMarsB" class="text-xs font-semibold text-slate-700 dark:text-slate-200 mt-4"></p>
+                    </div>
+
+                    <!-- Tool 7: travel time -->
+                    <div class="glass-panel p-6 rounded-2xl">
+                        <div class="text-2xl mb-1">🧭</div>
+                        <h3 class="font-orbitron font-bold text-lg mb-1 text-slate-900 dark:text-white">How Long Would It Take?</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Travel time to a destination at everyday and spacecraft speeds, in a straight line.</p>
+                        <label class="text-[11px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400" for="labTrip">Destination</label>
+                        <select id="labTrip" class="lab-in mt-1 mb-4">
+                            <option value="384400" selected>Moon, 384,400 km</option>
+                            <option value="149600000">The Sun, 149.6 million km</option>
+                            <option value="225000000">Mars (avg. distance), 225 million km</option>
+                            <option value="778500000">Jupiter (avg. distance), 778.5 million km</option>
+                            <option value="40170000000000">Proxima Centauri, 4.24 light-years</option>
+                        </select>
+                        <div id="labTripRows" class="space-y-2"></div>
+                    </div>
+
+                    <!-- Tool 8: moon phase -->
+                    <div class="glass-panel p-6 rounded-2xl">
+                        <div class="text-2xl mb-1">🌙</div>
+                        <h3 class="font-orbitron font-bold text-lg mb-1 text-slate-900 dark:text-white">Moon Phase Today</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Worked out from the Moon's 29.53 day cycle, using your device's date.</p>
+                        <svg id="labMoon" class="lab-moon" viewBox="0 0 200 200" role="img" aria-label="Current Moon phase"></svg>
+                        <div class="text-center mb-3">
+                            <div id="labMoonName" class="font-orbitron font-bold text-lg text-purple-600 dark:text-purple-300">-</div>
+                            <div id="labMoonSub" class="text-xs text-slate-500 dark:text-slate-400 mt-1"></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="lab-stat"><small>Next full moon</small><b id="labMoonFull">-</b></div>
+                            <div class="lab-stat"><small>Next new moon</small><b id="labMoonNew">-</b></div>
+                        </div>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-3">Average-cycle estimate, accurate to about a day. Shown as seen from the northern hemisphere.</p>
+                    </div>
+
+                    <!-- Tool 9: quiz -->
+                    <div class="glass-panel p-6 rounded-2xl">
+                        <div class="text-2xl mb-1">🧠</div>
+                        <h3 class="font-orbitron font-bold text-lg mb-1 text-slate-900 dark:text-white">Space Quiz</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Six quick questions on ISRO and the solar system.</p>
+                        <div class="flex justify-between text-[11px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 mb-2">
+                            <span id="labQNo">Question 1 / 6</span><span>Score: <b id="labQScore" class="font-orbitron">0</b></span>
+                        </div>
+                        <div class="lab-bar mb-4"><i id="labQBar"></i></div>
+                        <p id="labQText" class="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-3"></p>
+                        <div id="labQOpts"></div>
+                        <p id="labQFb" class="text-xs mt-2 text-slate-700 dark:text-slate-200" aria-live="polite"></p>
+                        <button id="labQNext" type="button" class="lab-btn mt-3 hidden">Next question</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer
+            class="mt-auto border-t border-slate-200 dark:border-white/10 py-8 px-4 text-center text-xs text-slate-500 relative z-10">
+            <p>&copy; 2026 COSMOSIS Orbital Systems. All stellar rights reserved. | <button onclick="logoutSession()"
+                    class="text-rose-500 hover:underline">Sign Out</button></p>
+        </footer>
+
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settingsModal"
+        class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-md transition-all">
+        <div class="glass-panel w-full max-w-md rounded-3xl p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="font-orbitron text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+                    <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                        </path>
+                    </svg>
+                    <span>Orbital Settings</span>
+                </h3>
+                <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Star Density -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2">Starfield
+                        Density</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setStarDensity('low')" id="density-low"
+                            class="py-2 text-xs font-medium rounded-xl border border-slate-700/50 hover:bg-purple-600/30 transition-all">Low</button>
+                        <button onclick="setStarDensity('medium')" id="density-medium"
+                            class="py-2 text-xs font-medium rounded-xl border border-slate-700/50 hover:bg-purple-600/30 transition-all bg-purple-600 text-white">Medium</button>
+                        <button onclick="setStarDensity('high')" id="density-high"
+                            class="py-2 text-xs font-medium rounded-xl border border-slate-700/50 hover:bg-purple-600/30 transition-all">High</button>
+                    </div>
+                </div>
+
+                <!-- Shooting Stars Toggle -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-xs font-semibold text-slate-800 dark:text-slate-200">Shooting Stars</div>
+                        <div class="text-[10px] text-slate-500">Enable periodic falling meteors</div>
+                    </div>
+                    <button onclick="toggleShootingStars()" id="shootingStarsToggleBtn"
+                        class="w-12 h-6 rounded-full bg-purple-600 transition-colors relative p-1">
+                        <div id="shootingStarsToggleDot"
+                            class="w-4 h-4 rounded-full bg-white transform translate-x-6 transition-transform"></div>
+                    </button>
+                </div>
+
+                <!-- Language (Google Translate) -->
+                <div>
+                    <label for="languageSelect"
+                        class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2"><i
+                            class='bx bx-globe align-middle mr-1'></i>Language</label>
+                    <div translate="no" class="notranslate">
+                        <select id="languageSelect" onchange="setLanguage(this.value)" class="lang-select"
+                            aria-label="Page language"></select>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-1.5">15 languages &middot; applies to every page &middot;
+                        translated by Google Translate</p>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-4 border-t border-slate-200 dark:border-white/10 flex justify-end">
+                <button onclick="toggleSettingsModal()"
+                    class="px-5 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold rounded-xl">Save
+                    & Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // ===== Google Sheets backend (Apps Script web app) =====
+        // Paste your deployed Web App URL here (see setup steps). Leave as-is to run in local-only mode.
+        const COSMOSIS_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwvRzDNz2xkT41e30QD75RJHIedcxvMNkS15sxhugKbBtm48iPefZE3fglQl6Nyb-sw/exec';
+
+        const sheetsEnabled = () => /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(COSMOSIS_SHEET_URL);
+
+        async function sheetCall(payload) {
+            if (!sheetsEnabled()) return { ok: false, skipped: true };
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 20000);
+            try {
+                // text/plain keeps this a "simple" request, so no CORS preflight is needed for Apps Script
+                const res = await fetch(COSMOSIS_SHEET_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload),
+                    signal: ctrl.signal
+                });
+                return await res.json();
+            } catch (err) {
+                return { ok: false, network: true, error: String(err) };
+            } finally {
+                clearTimeout(timer);
+            }
+        }
+
+        // Passwords never leave the browser in plain text: only a SHA-256 hash is sent to the sheet
+        async function hashPassword(email, pass) {
+            if (!(window.crypto && crypto.subtle)) return null;
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(email + ':' + pass + ':cosmosis'));
+            return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Offline queue: anything that could not reach the sheet is retried later
+        function queuePending(payload) {
+            const q = JSON.parse(localStorage.getItem('cosmosis_pending') || '[]');
+            q.push(payload);
+            localStorage.setItem('cosmosis_pending', JSON.stringify(q));
+        }
+
+        let flushingPending = false;
+        async function flushPending() {
+            if (!sheetsEnabled() || flushingPending) return;
+            const q = JSON.parse(localStorage.getItem('cosmosis_pending') || '[]');
+            if (!q.length) return;
+            flushingPending = true;
+            let i = 0;
+            for (; i < q.length; i++) {
+                const r = await sheetCall(q[i]);
+                if (r.network) break; // still offline: keep this one and everything after it
+            }
+            const rest = q.slice(i);
+            localStorage.setItem('cosmosis_pending', JSON.stringify(rest));
+            flushingPending = false;
+            if (i > 0) showToast(`${i} saved item${i > 1 ? 's' : ''} synced to Google Sheet.`, 'success');
+        }
+        window.addEventListener('online', flushPending);
+
+        const escapeHtml = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+        // Advanced Toast Notification System
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+
+            let iconClass = 'bx-check-circle';
+            let iconColor = '#10b981';
+            if (type === 'error') {
+                iconClass = 'bx-error-circle';
+                iconColor = '#ef4444';
+            } else if (type === 'info') {
+                iconClass = 'bx-info-circle';
+                iconColor = '#3b82f6';
+            }
+
+            toast.innerHTML = `<i class='bx ${iconClass}' style="font-size:22px; color:${iconColor};"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Authentication Modal Tab Switcher
+        function switchAuthTab(tab) {
+            const signInBtn = document.getElementById('tabSignInBtn');
+            const signUpBtn = document.getElementById('tabSignUpBtn');
+            const nameContainer = document.getElementById('nameFieldContainer');
+            const submitBtn = document.getElementById('authSubmitBtn');
+
+            if (tab === 'signup') {
+                signUpBtn.className = "flex-1 py-2.5 text-xs font-semibold rounded-lg transition-all duration-300 bg-purple-600 text-white shadow-md";
+                signInBtn.className = "flex-1 py-2.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition-all duration-300";
+                nameContainer.classList.remove('hidden');
+                submitBtn.innerText = "Initialize Cadet Profile";
+            } else {
+                signInBtn.className = "flex-1 py-2.5 text-xs font-semibold rounded-lg transition-all duration-300 bg-purple-600 text-white shadow-md";
+                signUpBtn.className = "flex-1 py-2.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition-all duration-300";
+                nameContainer.classList.add('hidden');
+                submitBtn.innerText = "Establish Connection";
+            }
+        }
+
+        // Authentication Logic (localStorage + Google Sheet)
+        async function handleAuthSubmit(event) {
+            event.preventDefault();
+            const btn = document.getElementById('authSubmitBtn');
+            const label = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = 'Connecting...';
+            btn.style.opacity = '0.7';
+            try {
+                await runAuth();
+            } finally {
+                btn.disabled = false;
+                btn.innerText = label;
+                btn.style.opacity = '';
+            }
+        }
+
+        async function runAuth() {
+            const email = document.getElementById('emailInput').value.trim().toLowerCase();
+            const pass = document.getElementById('passInput').value;
+            const isSignUp = !document.getElementById('nameFieldContainer').classList.contains('hidden');
+            const nameInputVal = document.getElementById('nameInput').value.trim();
+            const name = nameInputVal || email.split('@')[0];
+            const hash = await hashPassword(email, pass);
+
+            let users = JSON.parse(localStorage.getItem('cosmosis_users') || '[]');
+            const localMatch = u => u.email === email && (u.pass === pass || (hash && u.passHash === hash));
+            const saveUsers = () => localStorage.setItem('cosmosis_users', JSON.stringify(users));
+            const sheetOn = sheetsEnabled();
+
+            if (sheetOn && !hash) {
+                showToast('Sheet sync needs a secure (https) page. Using this device only.', 'info');
+            }
+            const useSheet = sheetOn && !!hash;
+
+            if (isSignUp) {
+                if (users.find(u => u.email === email)) {
+                    showToast('Email already registered. Please Sign In.', 'error');
+                    return;
+                }
+                if (useSheet) {
+                    const payload = { action: 'signup', name, email, passHash: hash };
+                    const r = await sheetCall(payload);
+                    if (r.error === 'exists') {
+                        showToast('Email already registered. Please Sign In.', 'error');
+                        return;
+                    }
+                    if (!r.ok) {
+                        queuePending(payload);
+                        showToast('Offline: profile saved here and will sync to the sheet later.', 'info');
+                    }
+                }
+                users.push(hash ? { name, email, passHash: hash } : { name, email, pass });
+                saveUsers();
+                const sessionUser = { name, email };
+                localStorage.setItem('cosmosis_current_user', JSON.stringify(sessionUser));
+                showToast(`Cadet profile created! Welcome, ${name}.`, 'success');
+                loginSuccess(sessionUser);
+                return;
+            }
+
+            // ---- Sign in ----
+            let user = null;
+            if (useSheet) {
+                const r = await sheetCall({ action: 'signin', email, passHash: hash });
+                if (r.ok) {
+                    user = { name: r.name || name, email };
+                    const lu = users.find(u => u.email === email);
+                    if (lu) { lu.passHash = hash; delete lu.pass; } else { users.push({ name: user.name, email, passHash: hash }); }
+                    saveUsers();
+                } else if (r.error === 'badpass') {
+                    showToast('Invalid email or password / Account not found.', 'error');
+                    return;
+                } else if (r.error === 'notfound') {
+                    const lu = users.find(localMatch);
+                    if (!lu) {
+                        showToast('Invalid email or password / Account not found.', 'error');
+                        return;
+                    }
+                    // Account created before the sheet was connected: add it to the sheet now
+                    const payload = { action: 'signup', name: lu.name, email, passHash: hash };
+                    const sr = await sheetCall(payload);
+                    if (!sr.ok && sr.error !== 'exists') queuePending(payload);
+                    user = { name: lu.name, email };
+                } else if (r.network) {
+                    showToast('Sheet unreachable. Signing in with this device.', 'info');
+                } else {
+                    showToast('Sheet error. Signing in with this device.', 'info');
+                }
+            }
+
+            if (!user) {
+                const lu = users.find(localMatch);
+                if (!lu) {
+                    showToast('Invalid email or password / Account not found.', 'error');
+                    return;
+                }
+                if (hash && lu.pass) { lu.passHash = hash; delete lu.pass; saveUsers(); }
+                user = { name: lu.name, email: lu.email };
+            }
+
+            localStorage.setItem('cosmosis_current_user', JSON.stringify(user));
+            showToast(`Access granted. Welcome back, ${user.name}!`, 'success');
+            loginSuccess(user);
+            flushPending();
+        }
+
+        function continueAsGuest() {
+            const guestUser = { name: 'Guest_' + Math.floor(1000 + Math.random() * 9000), email: 'guest@cosmosis.space' };
+            localStorage.setItem('cosmosis_current_user', JSON.stringify(guestUser));
+            showToast('Logged in as Guest Explorer.', 'info');
+            loginSuccess(guestUser);
+        }
+
+        function loginSuccess(user) {
+            const userAvatar = document.getElementById('userAvatar');
+            const accountLabel = document.getElementById('accountLabel');
+            const dropdownName = document.getElementById('dropdownName');
+            const dropdownEmail = document.getElementById('dropdownEmail');
+            const mobileBadge = document.getElementById('mobileUserBadgeId');
+
+            if (userAvatar) userAvatar.textContent = user.name.charAt(0).toUpperCase();
+            if (accountLabel) accountLabel.textContent = user.name.split(' ')[0];
+            if (dropdownName) dropdownName.textContent = user.name;
+            if (dropdownEmail) dropdownEmail.textContent = user.email;
+            if (mobileBadge) mobileBadge.textContent = `ID: ${user.name}`;
+
+            const modal = document.getElementById('authModal');
+            const app = document.getElementById('mainApp');
+
+            modal.style.opacity = '0';
+            modal.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                app.classList.remove('opacity-0', 'pointer-events-none');
+            }, 500);
+        }
+
+        function logoutSession() {
+            localStorage.removeItem('cosmosis_current_user');
+            const modal = document.getElementById('authModal');
+            const app = document.getElementById('mainApp');
+
+            app.classList.add('opacity-0', 'pointer-events-none');
+            modal.classList.remove('hidden');
+            modal.style.opacity = '1';
+            modal.style.transform = 'scale(1)';
+            showToast('Orbital session terminated. Signed out successfully.', 'info');
+        }
+
+        // Check active session on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const session = JSON.parse(localStorage.getItem('cosmosis_current_user'));
+            if (session) {
+                loginSuccess(session);
+            }
+            loadDispatches();
+            initLanguage();
+            flushPending();
+        });
+
+        // Navigation Tab Switcher
+        function switchTab(tabId) {
+            const sections = document.querySelectorAll('.tab-section');
+            sections.forEach(sec => sec.classList.add('hidden'));
+
+            const targetSection = document.getElementById(`section-${tabId}`);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+            }
+
+            const navButtons = document.querySelectorAll('.nav-btn');
+            navButtons.forEach(btn => {
+                btn.className = "nav-btn px-5 py-2 text-xs font-semibold rounded-lg dark:text-slate-300 light:text-slate-700 dark:hover:text-white light:hover:text-black dark:hover:bg-white/5 light:hover:bg-slate-300 transition-all duration-300";
+            });
+
+            const activeNavBtn = document.getElementById(`nav-${tabId}`);
+            if (activeNavBtn) {
+                activeNavBtn.className = "nav-btn px-5 py-2 text-xs font-semibold rounded-lg transition-all duration-300 bg-purple-600 text-white shadow";
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Toggle Switch Theme Switcher (Dark / Light Mode)
+        function toggleTheme() {
+            const htmlEl = document.documentElement;
+            const themeIcon = document.getElementById('themeIcon');
+
+            if (htmlEl.classList.contains('dark')) {
+                htmlEl.classList.remove('dark');
+                htmlEl.classList.add('light');
+                document.body.classList.remove('bg-black', 'text-slate-100');
+                document.body.classList.add('bg-twilight-50', 'text-slate-900');
+
+                themeIcon.classList.replace('bxs-sun', 'bxs-moon');
+                themeIcon.style.color = '#38bdf8';
+                showToast('Light Mode Activated', 'info');
+            } else {
+                htmlEl.classList.remove('light');
+                htmlEl.classList.add('dark');
+                document.body.classList.remove('bg-twilight-50', 'text-slate-900');
+                document.body.classList.add('bg-black', 'text-slate-100');
+
+                themeIcon.classList.replace('bxs-moon', 'bxs-sun');
+                themeIcon.style.color = '#f59e0b';
+                showToast('Cosmic Dark Mode Activated', 'success');
+            }
+        }
+
+        // Settings Modal Toggle
+        function toggleSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            modal.classList.toggle('hidden');
+            modal.classList.toggle('flex');
+        }
+
+        let starDensityMultiplier = 1;
+        function setStarDensity(level) {
+            ['low', 'medium', 'high'].forEach(l => {
+                document.getElementById(`density-${l}`).className = "py-2 text-xs font-medium rounded-xl border border-slate-700/50 hover:bg-purple-600/30 transition-all";
+            });
+            document.getElementById(`density-${level}`).className = "py-2 text-xs font-medium rounded-xl border border-slate-700/50 hover:bg-purple-600/30 transition-all bg-purple-600 text-white";
+
+            if (level === 'low') starDensityMultiplier = 0.5;
+            else if (level === 'medium') starDensityMultiplier = 1;
+            else if (level === 'high') starDensityMultiplier = 2;
+            initStars();
+        }
+
+        let shootingStarsEnabled = true;
+        function toggleShootingStars() {
+            shootingStarsEnabled = !shootingStarsEnabled;
+            const dot = document.getElementById('shootingStarsToggleDot');
+            const btn = document.getElementById('shootingStarsToggleBtn');
+            if (shootingStarsEnabled) {
+                dot.style.transform = 'translateX(24px)';
+                btn.className = "w-12 h-6 rounded-full bg-purple-600 transition-colors relative p-1";
+            } else {
+                dot.style.transform = 'translateX(0px)';
+                btn.className = "w-12 h-6 rounded-full bg-slate-700 transition-colors relative p-1";
+            }
+        }
+
+        // Community Dispatches (localStorage + Google Sheet)
+        async function handlePostDispatch(event) {
+            event.preventDefault();
+            const box = document.getElementById('dispatchText');
+            const text = box.value.trim();
+            if (!text) return;
+
+            const session = JSON.parse(localStorage.getItem('cosmosis_current_user')) || { name: 'Cadet' };
+            const dispatches = JSON.parse(localStorage.getItem('cosmosis_dispatches') || '[]');
+
+            dispatches.unshift({
+                name: session.name,
+                text: text,
+                time: 'Just now'
+            });
+
+            localStorage.setItem('cosmosis_dispatches', JSON.stringify(dispatches));
+            box.value = '';
+            loadDispatches();
+
+            if (!sheetsEnabled()) {
+                showToast('Dispatch transmitted to orbital relay!', 'success');
+                return;
+            }
+            const payload = { action: 'experience', name: session.name, email: session.email || '', text };
+            const r = await sheetCall(payload);
+            if (r.ok) {
+                showToast('Experience saved to Google Sheet!', 'success');
+            } else {
+                queuePending(payload);
+                showToast('Saved on this device. It will sync to the sheet when online.', 'info');
+            }
+        }
+
+        function loadDispatches() {
+            const listEl = document.getElementById('dispatchesList');
+            const dispatches = JSON.parse(localStorage.getItem('cosmosis_dispatches') || '[{"name": "Commander Alex", "text": "Noticed brilliant aurora activity near sector 4.", "time": "2 hrs ago"}]');
+
+            listEl.innerHTML = dispatches.map(d => `
+                <div class="p-4 rounded-2xl bg-slate-900/30 dark:bg-slate-900/30 light:bg-slate-100 border border-white/5 light:border-slate-200">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-bold text-purple-400 light:text-purple-700">${escapeHtml(d.name)}</span>
+                        <span class="text-[10px] text-slate-500">${escapeHtml(d.time)}</span>
+                    </div>
+                    <p class="text-xs text-slate-700 dark:text-slate-300">${escapeHtml(d.text)}</p>
+                </div>
+            `).join('');
+        }
+
+        // FEATURE 2 LOGIC: ISRO Timeline Milestones & Slider
+        const isroEpochs = [
+            {
+                year: "1963",
+                tag: "Establishment & First Sounding Rocket",
+                title: "Thumba Launch & Nike-Apache",
+                rocket: "Nike-Apache Sounding Rocket",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTvx74ptmt3v7LpT-1N7GHufq69k1rrMBqRv4L62opvaw&s",
+                highlights: "Establishment of Thumba Equatorial Rocket Launch Station (TERLS) in Kerala. Successfully launched the first sounding rocket on November 21, 1963.",
+                impact: "Laid the foundational stone for India's indigenous space research and atmospheric studies."
+            },
+            {
+                year: "1975",
+                tag: "First Satellite Mission",
+                title: "Aryabhata Spacecraft",
+                rocket: "Kosmos-3M Launch Vehicle",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8rScGcvqzv7g6PB2-2aTlHWac_eX8LNwCITy_TLc7lA&s=10",
+                highlights: "Named after the classical Indian astronomer and mathematician Aryabhata. India's first satellite was built entirely indigenously and launched from Kapustin Yar.",
+                impact: "Proved India's capability in designing, building, and operating spacecraft in orbit."
+            },
+            {
+                year: "2008",
+                tag: "Lunar Discovery Mission",
+                title: "Chandrayaan-1",
+                rocket: "PSLV-XL C11",
+                image: "https://cdn.mos.cms.futurecdn.net/pTtaCqHnTB7PS55DAD7kER.jpg",
+                highlights: "India's first lunar probe mission. Carried 11 scientific instruments built in India, USA, UK, Germany, Sweden, and Bulgaria. Confirmed the presence of water molecules on the Moon.",
+                impact: "Revolutionized lunar science globally and established ISRO as a premier deep-space agency."
+            },
+            {
+                year: "2013",
+                tag: "Interplanetary Triumph",
+                title: "Mangalyaan (Mars Orbiter Mission)",
+                rocket: "PSLV-XL C25",
+                image: "https://cdn.mos.cms.futurecdn.net/Dyw64ozhacwXAguEhhxGHM.jpg",
+                highlights: "Made India the first Asian nation to reach Martian orbit and the first in the world to succeed in Mars orbit insertion on its very first attempt at record-low budget.",
+                impact: "Redefined frugal engineering and cost-effective interplanetary exploration benchmarks worldwide."
+            },
+            {
+                year: "2019",
+                tag: "Advanced Lunar & Navigation",
+                title: "Chandrayaan-2 & NavIC",
+                rocket: "GSLV Mk III (LVM3)",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgeJfZb5SyvoQW-BcnY5GMaUCE4lbfPQ-zYtbQw34MCJFV6mbabXVDljk&s=10",
+                highlights: "Comprehensive mission featuring an Orbiter, Vikram lander, and Pragyan rover, alongside the expansion of India's indigenous regional satellite navigation system (NavIC).",
+                impact: "Achieved high-resolution lunar surface mapping and independent sovereign positioning capability."
+            },
+            {
+                year: "2023",
+                tag: "Historic South Pole Landing",
+                title: "Chandrayaan-3 & Aditya-L1",
+                rocket: "LVM3 M4 & PSLV-C57",
+                image: "https://etimg.etb2bimg.com/photo/102940055.cms?mod=835138",
+                highlights: "Historic soft landing on the uncharted lunar South Pole on August 23, 2023, followed by the successful launch of India's first solar observatory spacecraft (Aditya-L1).",
+                impact: "India became the 4th nation to land on the Moon and the 1st to reach the lunar South Pole."
+            },
+            {
+                year: "2025/2026",
+                tag: "Human Spaceflight Epoch",
+                title: "Gaganyaan Program",
+                rocket: "LVM3 (HLVM3 Human-Rated)",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVUfKZQ7Ga68fV5jyq4w4Yl_fPBb46JMPtpjT0YGOFbg&s=10",
+                highlights: "India's maiden crewed orbital spaceflight initiative. Designed to launch Indian astronauts into Low Earth Orbit (LEO) and safely recover them in Indian territorial waters.",
+                impact: "Propels India into the elite fraternity of nations capable of independent human spaceflight."
+            }
+        ];
+
+        // Keeps thumb fill, year labels and aria text in step with the current epoch
+        function syncIsroSlider(index) {
+            const slider = document.getElementById('isroSlider');
+            if (!slider || !isroEpochs[index]) return;
+            const max = parseInt(slider.max) || 6;
+            slider.value = index;
+            slider.style.setProperty('--pos', index / max);
+            slider.setAttribute('aria-valuetext', isroEpochs[index].year);
+            document.querySelectorAll('.isro-ticks span').forEach((el, i) => el.classList.toggle('is-active', i === index));
+        }
+
+        function updateIsroEpochCard(index) {
+            syncIsroSlider(index);
+            const epoch = isroEpochs[index];
+            const container = document.getElementById('isroCardContainer');
+            if (!container) return;
+
+            container.classList.remove('opacity-100', 'translate-y-0');
+            container.classList.add('opacity-0', 'translate-y-5');
+
+            setTimeout(() => {
+                document.getElementById('epochBadgeDisplay').innerText = `Epoch: ${epoch.year}`;
+                document.getElementById('isroCardImg').src = epoch.image;
+                document.getElementById('isroCardRocket').innerText = epoch.rocket;
+                document.getElementById('isroCardTag').innerHTML = `<i class='bx bx-time'></i><span>${epoch.year} - ${epoch.tag}</span>`;
+                document.getElementById('isroCardTitle').innerText = epoch.title;
+                document.getElementById('isroCardHighlights').innerText = epoch.highlights;
+                document.getElementById('isroCardImpact').innerText = epoch.impact;
+
+                container.classList.remove('opacity-0', 'translate-y-5');
+                container.classList.add('opacity-100', 'translate-y-0');
+            }, 150);
+        }
+
+        function setEpochSlider(index) {
+            const slider = document.getElementById('isroSlider');
+            if (slider) {
+                slider.value = index;
+                updateIsroEpochCard(index);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const slider = document.getElementById('isroSlider');
+            if (slider) {
+                slider.addEventListener('input', (e) => {
+                    updateIsroEpochCard(parseInt(e.target.value));
+                });
+                updateIsroEpochCard(0);
+            }
+        });
+
+        // ===== Language: handled by the shared engine (lang.js) =====
+        // The choice is saved once and every page (project2, chandayaan, mars, sun, navic, aryabhatta, game)
+        // opens in that language; pages that are already open switch live.
+        function setLanguage(code) { if (window.CosmosLang) window.CosmosLang.set(code); }
+        function initLanguage() { if (window.CosmosLang) window.CosmosLang.syncSelects(); }
+
+        // HTML5 Canvas Starfield & Shooting Stars Animation
+        const canvas = document.getElementById('starCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let stars = [];
+        let shootingStars = [];
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function initStars() {
+            stars = [];
+            const starCount = Math.floor(((window.innerWidth * window.innerHeight) / 3500) * starDensityMultiplier);
+            for (let i = 0; i < starCount; i++) {
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    radius: Math.random() * 1.5 + 0.4,
+                    alpha: Math.random(),
+                    dAlpha: (Math.random() * 0.02 + 0.005) * (Math.random() < 0.5 ? 1 : -1),
+                    vx: (Math.random() - 0.5) * 0.08,
+                    vy: (Math.random() - 0.5) * 0.08
+                });
+            }
+        }
+        initStars();
+
+        function maybeSpawnShootingStar() {
+            if (shootingStarsEnabled && Math.random() < 0.015 && shootingStars.length < 2) {
+                shootingStars.push({
+                    x: Math.random() * width,
+                    y: 0,
+                    length: Math.random() * 80 + 40,
+                    speed: Math.random() * 12 + 8,
+                    angle: Math.PI / 4
+                });
+            }
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, width, height);
+
+            const isDark = document.documentElement.classList.contains('dark');
+            const starColor = isDark ? '255, 255, 255' : '79, 70, 229';
+
+            stars.forEach(star => {
+                star.alpha += star.dAlpha;
+                if (star.alpha <= 0.2 || star.alpha >= 1) {
+                    star.dAlpha *= -1;
+                }
+
+                star.x += star.vx;
+                star.y += star.vy;
+
+                if (star.x < 0) star.x = width;
+                if (star.x > width) star.x = 0;
+                if (star.y < 0) star.y = height;
+                if (star.y > height) star.y = 0;
+
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${starColor}, ${star.alpha})`;
+                ctx.fill();
+            });
+
+            maybeSpawnShootingStar();
+            ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(99, 102, 241, 0.8)';
+            ctx.lineWidth = 1.5;
+            shootingStars.forEach((ss, index) => {
+                ctx.beginPath();
+                ctx.moveTo(ss.x, ss.y);
+                ctx.lineTo(ss.x - ss.length * Math.cos(ss.angle), ss.y - ss.length * Math.sin(ss.angle));
+                ctx.stroke();
+
+                ss.x += ss.speed * Math.cos(ss.angle);
+                ss.y += ss.speed * Math.sin(ss.angle);
+
+                if (ss.x > width || ss.y > height) {
+                    shootingStars.splice(index, 1);
+                }
+            });
+
+            requestAnimationFrame(animateCanvas);
+        }
+
+        animateCanvas();
+
+        // (the old flat 2D astronaut was replaced by the 3D astronaut script at the end of the page)
+    </script>
+    <script id="lab-js">
+        (function () {
+            var $ = function (id) { return document.getElementById(id); };
+            var RM = matchMedia('(prefers-reduced-motion:reduce)').matches;
+            var WORLDS = [['Mercury', '☿️', 3.70], ['Venus', '♀️', 8.87], ['Moon', '🌕', 1.62], ['Earth', '🌍', 9.81], ['Mars', '🔴', 3.71], ['Jupiter', '🪐', 24.79], ['Saturn', '🪐', 10.44], ['Neptune', '🔵', 11.15]];
+            var G0 = 9.80665, C = 299792.458;
+
+            /* animated number */
+            function tween(el, to, dec) {
+                var from = el._v || 0; el._v = to;
+                if (RM) { el.textContent = to.toFixed(dec); return; }
+                var t0 = performance.now();
+                (function step(t) {
+                    var k = Math.min(1, (t - t0) / 700), e = 1 - Math.pow(1 - k, 3);
+                    el.textContent = (from + (to - from) * e).toFixed(dec);
+                    if (k < 1) requestAnimationFrame(step);
+                })(t0);
+            }
+
+            /* 1. weights */
+            function weights() {
+                var kg = Math.max(1, Math.min(500, parseFloat($('labKg').value) || 0)), box = $('labWeights'), first = !box.children.length;
+                if (first) {
+                    box.innerHTML = WORLDS.map(function (w, i) {
+                        return '<div class="lab-row" style="--i:' + i + '"><div class="flex justify-between text-xs mb-1 text-slate-700 dark:text-slate-200"><span>' + w[1] + ' ' + w[0] + '</span><b class="font-orbitron"><span data-v="' + i + '">0</span> kg</b></div><div class="lab-bar"><i data-b="' + i + '"></i></div></div>';
+                    }).join('');
+                }
+                WORLDS.forEach(function (w, i) {
+                    var felt = kg * w[2] / 9.81;
+                    tween(box.querySelector('[data-v="' + i + '"]'), felt, 1);
+                    var bar = box.querySelector('[data-b="' + i + '"]');
+                    setTimeout(function () { bar.style.width = Math.min(100, w[2] / 24.79 * 100) + '%'; }, first ? 100 : 0);
+                });
+            }
+
+            /* 2. signal delay */
+            function fmt(s) {
+                if (s < 60) return s.toFixed(s < 10 ? 2 : 1) + ' s';
+                var m = Math.floor(s / 60), r = Math.round(s % 60);
+                if (m < 60) return m + ' min ' + r + ' s';
+                return Math.floor(m / 60) + ' h ' + (m % 60) + ' min';
+            }
+            function signal() {
+                var km = parseFloat($('labTarget').value), one = km / C;
+                $('labOne').textContent = fmt(one); $('labRound').textContent = fmt(one * 2);
+                var p = $('labPulse'), dur = Math.max(1.2, Math.min(6, 1.2 + Math.log10(km / 3e5) * 1.1));
+                p.style.setProperty('--dur', dur + 's'); p.classList.remove('go'); void p.offsetWidth; if (!RM) p.classList.add('go');
+                $('labNote').textContent = one < 3 ? 'Almost instant: operators can steer in near real time.' : one < 60 * 5 ? 'Noticeable lag: commands must be planned ahead.' : 'Long delay: the spacecraft must act on its own between instructions.';
+            }
+
+            /* 3. rocket equation */
+            function rocket() {
+                var isp = parseFloat($('labIsp').value), wet = parseFloat($('labWet').value), dry = parseFloat($('labDry').value);
+                if (!(isp > 0) || !(wet > 0) || !(dry > 0) || dry >= wet) {
+                    $('labVerdict').textContent = 'Enter a wet mass larger than the dry mass.'; return;
+                }
+                var dv = isp * G0 * Math.log(wet / dry) / 1000, pct = Math.min(100, dv / 9.4 * 100);
+                tween($('labDv'), dv, 2);
+                $('labDvBar').style.width = pct + '%';
+                $('labRk').style.bottom = (4 + Math.min(1, dv / 12.6) * 62) + '%';
+                $('labVerdict').textContent = dv < 9.4 ? '🔸 Not enough for orbit on its own. Add a stage or cut dry mass.' : dv < 12.6 ? '🟢 Enough to reach low Earth orbit.' : '🌕 Enough to head on towards the Moon.';
+            }
+
+            function init() {
+                weights(); signal(); rocket();
+                $('labKg').addEventListener('input', weights);
+                $('labTarget').addEventListener('change', signal);
+                ['labIsp', 'labWet', 'labDry'].forEach(function (id) { $(id).addEventListener('input', rocket); });
+                document.querySelectorAll('#section-lab .lab-chip').forEach(function (b) {
+                    b.addEventListener('click', function () {
+                        var v = b.dataset.p.split(','); $('labIsp').value = v[0]; $('labWet').value = v[1]; $('labDry').value = v[2]; rocket();
+                    });
+                });
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+        })();
+    </script>
+    <script id="lab-js2">
+        (function () {
+            var $ = function (id) { return document.getElementById(id); };
+            var RM = matchMedia('(prefers-reduced-motion:reduce)').matches;
+            function fmtNum(n, d) { return n.toLocaleString('en-US', { maximumFractionDigits: d == null ? 0 : d }); }
+
+            /* 4. orbit explorer */
+            var MU = 398600.4418, RE = 6371, A_MIN = 200, A_MAX = 40000, LR = Math.log(A_MAX / A_MIN);
+            function sliderToAlt(v) { return A_MIN * Math.exp(LR * v / 1000); }
+            function altToSlider(a) { return 1000 * Math.log(a / A_MIN) / LR; }
+            function setAlt(alt) {
+                var r = RE + alt, v = Math.sqrt(MU / r), T = 2 * Math.PI * Math.sqrt(r * r * r / MU) / 60;
+                var frac = Math.log(alt / A_MIN) / LR;
+                $('labAltTxt').textContent = fmtNum(alt) + ' km';
+                $('labOrbV').textContent = v.toFixed(2) + ' km/s';
+                $('labOrbT').textContent = T < 120 ? T.toFixed(1) + ' min' : (T / 60).toFixed(2) + ' h';
+                $('labOrbRing').setAttribute('r', 30 + 62 * frac);
+                $('labOrbSat').setAttribute('cx', 100 + 30 + 62 * frac);
+                $('labOrbSpin').style.setProperty('--dur', (3 + 12 * frac) + 's');
+                $('labOrbSpin').style.animation = RM ? 'none' : '';
+                $('labOrbNote').textContent = Math.abs(alt - 35786) < 500 ? 'Geostationary: one lap matches Earth\'s spin, so the satellite hangs over one spot. Communication satellites such as INSAT use this.'
+                    : alt < 2000 ? 'Low Earth orbit: Earth observation satellites and space stations fly here.'
+                    : alt < 35000 ? 'Medium Earth orbit: navigation constellations such as GPS sit in this band.'
+                    : 'High orbit: beyond geostationary height, so one lap takes more than a day.';
+            }
+            function initOrbit() {
+                $('labAlt').addEventListener('input', function () { setAlt(sliderToAlt(parseFloat(this.value))); });
+                document.querySelectorAll('#section-lab [data-alt]').forEach(function (b) {
+                    b.addEventListener('click', function () { var a = parseFloat(b.dataset.alt); $('labAlt').value = altToSlider(a); setAlt(a); });
+                });
+                setAlt(408);
+            }
+
+            /* 5. launch simulator */
+            var VEH = {
+                pslv: { T: 1080, H: 600, V: 7.6, ev: [[0, 'Liftoff'], [0.12, '1st stage separation'], [0.27, 'Heat shield separation'], [0.33, '2nd stage separation'], [0.62, '3rd stage separation'], [1, 'Satellite separation']] },
+                lvm3: { T: 1000, H: 180, V: 10.2, ev: [[0, 'Liftoff'], [0.12, 'Solid booster separation'], [0.19, 'Heat shield separation'], [0.33, 'Core stage separation, cryogenic stage ignites'], [1, 'Spacecraft separation']] },
+                sslv: { T: 780, H: 500, V: 7.6, ev: [[0, 'Liftoff'], [0.15, '1st stage separation'], [0.28, 'Heat shield separation'], [0.45, '2nd stage separation'], [0.75, '3rd stage separation'], [1, 'Satellite separation']] }
+            };
+            var launching = false;
+            function mmss(s) { s = Math.round(s); return ('0' + Math.floor(s / 60)).slice(-2) + ':' + ('0' + (s % 60)).slice(-2); }
+            function showTel(p, v) {
+                $('labLT').textContent = mmss(v.T * p);
+                $('labLA').textContent = fmtNum(v.H * Math.pow(p, 2.4)) + ' km';
+                $('labLV').textContent = (v.V * Math.pow(p, 1.25)).toFixed(1) + ' km/s';
+                $('labLRk').style.bottom = (4 + p * 62) + '%';
+            }
+            function fly(v) {
+                var ev = $('labEvents'), shown = 0, dur = RM ? 0 : 9000, t0 = performance.now();
+                $('labCd').textContent = 'LIFTOFF!';
+                function step(t) {
+                    var p = dur ? Math.min(1, (t - t0) / dur) : 1;
+                    showTel(p, v);
+                    while (shown < v.ev.length && p >= v.ev[shown][0]) {
+                        var d = document.createElement('div'); d.className = 'lab-ev';
+                        d.innerHTML = '<b>T+' + mmss(v.T * v.ev[shown][0]) + '</b><span></span>';
+                        d.lastChild.textContent = v.ev[shown][1]; ev.appendChild(d); shown++;
+                    }
+                    if (p < 1) requestAnimationFrame(step);
+                    else { $('labCd').textContent = 'ORBIT REACHED'; launching = false; $('labGo').disabled = false; $('labGo').textContent = 'Launch again'; $('labVeh').disabled = false; }
+                }
+                requestAnimationFrame(step);
+            }
+            function startLaunch() {
+                if (launching) return; launching = true;
+                var v = VEH[$('labVeh').value];
+                $('labGo').disabled = true; $('labVeh').disabled = true; $('labEvents').innerHTML = '';
+                showTel(0, v);
+                var n = RM ? 0 : 10;
+                if (!n) { fly(v); return; }
+                $('labCd').textContent = 'T-' + n;
+                var iv = setInterval(function () {
+                    n--;
+                    if (n > 0) { $('labCd').textContent = 'T-' + n; }
+                    else { clearInterval(iv); fly(v); }
+                }, 600);
+            }
+            function resetLaunch() {
+                if (launching) return;
+                $('labCd').textContent = 'READY'; $('labEvents').innerHTML = ''; showTel(0, VEH[$('labVeh').value]); $('labGo').textContent = 'Start countdown';
+            }
+
+            /* 6. age on planets */
+            var PL = [['Mercury', '☿️', 87.97], ['Venus', '♀️', 224.70], ['Earth', '🌍', 365.25], ['Mars', '🔴', 686.98], ['Jupiter', '🪐', 4332.59], ['Saturn', '🪐', 10759.22], ['Uranus', '🔵', 30688.5], ['Neptune', '🔵', 60182]];
+            function ages() {
+                var age = Math.max(0, Math.min(120, parseFloat($('labAge').value) || 0)), box = $('labAges');
+                if (!box.children.length) {
+                    box.innerHTML = PL.map(function (p, i) {
+                        return '<div class="lab-row flex justify-between text-xs text-slate-700 dark:text-slate-200" style="--i:' + i + '"><span>' + p[1] + ' ' + p[0] + '</span><b class="font-orbitron"><span data-a="' + i + '">0</span></b></div>';
+                    }).join('');
+                }
+                PL.forEach(function (p, i) {
+                    var el = box.querySelector('[data-a="' + i + '"]'), to = age * 365.25 / p[2], dec = to < 10 ? 2 : 1;
+                    el.textContent = to.toFixed(dec);
+                });
+                var m = age * 365.25 / 686.98, days = Math.round((Math.floor(m) + 1 - m) * 686.98), d = new Date(Date.now() + days * 864e5);
+                $('labMarsB').textContent = '🎉 Your next Mars birthday is in about ' + fmtNum(days) + ' Earth days (' + d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) + ').';
+            }
+
+            /* 7. travel time */
+            var MODES = [['🚶 Walking', 5], ['🚗 Car', 100], ['✈️ Passenger jet', 900], ['🚀 Orbiting spacecraft (7.8 km/s)', 28080], ['🛸 Voyager 1 (17 km/s)', 61200], ['💡 Light', 1079252848.8]];
+            function human(h) {
+                var s = h * 3600;
+                if (s < 1) return '< 1 second';
+                if (s < 120) return Math.round(s) + ' seconds';
+                if (h < 2) return Math.round(h * 60) + ' minutes';
+                if (h < 72) return h.toFixed(1) + ' hours';
+                var dd = h / 24;
+                if (dd < 730) return fmtNum(dd, 0) + ' days';
+                var y = dd / 365.25;
+                if (y < 1e5) return fmtNum(y, y < 100 ? 1 : 0) + ' years';
+                if (y < 1e9) return (y / 1e6).toFixed(1) + ' million years';
+                return (y / 1e9).toFixed(1) + ' billion years';
+            }
+            function trip() {
+                var km = parseFloat($('labTrip').value);
+                $('labTripRows').innerHTML = MODES.map(function (m, i) {
+                    return '<div class="lab-row flex justify-between gap-3 text-xs text-slate-700 dark:text-slate-200" style="--i:' + i + '"><span>' + m[0] + '</span><b class="font-orbitron text-right">' + human(km / m[1]) + '</b></div>';
+                }).join('');
+            }
+
+            /* 8. moon phase */
+            function moon() {
+                var SYN = 29.530588853, REF = Date.UTC(2000, 0, 6, 18, 14), now = Date.now();
+                var age = (((now - REF) / 864e5) % SYN + SYN) % SYN, p = age / SYN, ill = (1 - Math.cos(2 * Math.PI * p)) / 2;
+                var names = [[1.85, 'New Moon'], [5.53, 'Waxing Crescent'], [9.22, 'First Quarter'], [12.91, 'Waxing Gibbous'], [16.61, 'Full Moon'], [20.30, 'Waning Gibbous'], [23.99, 'Last Quarter'], [27.68, 'Waning Crescent'], [99, 'New Moon']];
+                var nm = names.filter(function (n) { return age < n[0]; })[0][1];
+                var r = 80, rx = Math.max(0.01, r * Math.abs(Math.cos(2 * Math.PI * p))), cres = Math.cos(2 * Math.PI * p) > 0;
+                var path = 'M100 ' + (100 - r) + ' A' + r + ' ' + r + ' 0 0 1 100 ' + (100 + r) + ' A' + rx + ' ' + r + ' 0 0 ' + (cres ? 0 : 1) + ' 100 ' + (100 - r) + ' Z';
+                $('labMoon').innerHTML = '<circle cx="100" cy="100" r="80" fill="#1e293b" stroke="rgba(148,163,184,.4)"></circle>' +
+                    '<g' + (p > 0.5 ? ' transform="translate(200,0) scale(-1,1)"' : '') + '><path d="' + path + '" fill="#e2e8f0"></path></g>';
+                $('labMoonName').textContent = nm;
+                $('labMoonSub').textContent = Math.round(ill * 100) + '% lit · day ' + age.toFixed(1) + ' of 29.5';
+                function inDays(x) { var d = new Date(now + x * 864e5); return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }); }
+                $('labMoonFull').textContent = inDays(((SYN / 2 - age) % SYN + SYN) % SYN);
+                $('labMoonNew').textContent = inDays(SYN - age);
+            }
+
+            /* 9. quiz */
+            var QS = [
+                { q: 'Which mission made India the first country to land near the Moon\'s south polar region?', o: ['Chandrayaan-1', 'Chandrayaan-3', 'Mangalyaan', 'Aditya-L1'], a: 1, e: 'Chandrayaan-3 landed on 23 August 2023.' },
+                { q: 'In which year did Mangalyaan (Mars Orbiter Mission) enter orbit around Mars?', o: ['2008', '2011', '2014', '2019'], a: 2, e: 'It reached Mars orbit on 24 September 2014, on India\'s first attempt.' },
+                { q: 'Aditya-L1 observes the Sun from near which point?', o: ['Sun-Earth L1', 'Geostationary orbit', 'The Moon\'s surface', 'Mars orbit'], a: 0, e: 'L1 lies about 1.5 million km from Earth towards the Sun, with an unblocked view.' },
+                { q: 'Roughly how long does sunlight take to reach Earth?', o: ['8 seconds', '8 minutes', '8 hours', '8 days'], a: 1, e: 'About 8 minutes 20 seconds, over 149.6 million km at the speed of light.' },
+                { q: 'On which of these worlds would you feel lightest?', o: ['Mars', 'Jupiter', 'The Moon', 'Venus'], a: 2, e: 'The Moon\'s gravity is only about 1/6 of Earth\'s.' },
+                { q: 'In which year was India\'s first satellite, Aryabhata, launched?', o: ['1957', '1975', '1984', '2008'], a: 1, e: 'Aryabhata was launched on 19 April 1975.' }
+            ];
+            var qi = 0, qs = 0, qLocked = false;
+            function showQ() {
+                var q = QS[qi]; qLocked = false;
+                $('labQNo').textContent = 'Question ' + (qi + 1) + ' / ' + QS.length;
+                $('labQBar').style.width = (qi / QS.length * 100) + '%';
+                $('labQText').textContent = q.q; $('labQFb').textContent = ''; $('labQNext').classList.add('hidden');
+                var box = $('labQOpts'); box.innerHTML = '';
+                q.o.forEach(function (t, i) {
+                    var b = document.createElement('button'); b.type = 'button'; b.className = 'lab-opt'; b.textContent = t;
+                    b.addEventListener('click', function () { answer(i); }); box.appendChild(b);
+                });
+            }
+            function answer(i) {
+                if (qLocked) return; qLocked = true;
+                var q = QS[qi], btns = $('labQOpts').children;
+                for (var k = 0; k < btns.length; k++) { btns[k].disabled = true; if (k === q.a) btns[k].classList.add('ok'); }
+                if (i === q.a) { qs++; $('labQScore').textContent = qs; $('labQFb').textContent = '✅ Correct. ' + q.e; }
+                else { btns[i].classList.add('bad'); $('labQFb').textContent = '❌ Not quite. ' + q.e; }
+                $('labQNext').textContent = qi === QS.length - 1 ? 'See result' : 'Next question';
+                $('labQNext').classList.remove('hidden');
+            }
+            function nextQ() {
+                if (qi < QS.length - 1) { qi++; showQ(); return; }
+                $('labQBar').style.width = '100%'; $('labQNo').textContent = 'Finished';
+                var t = qs === QS.length ? 'Perfect. You are mission-ready! 🚀' : qs >= 4 ? 'Great work, cadet. 🌟' : qs >= 2 ? 'Good start. Try again to climb higher.' : 'Keep exploring the other tools and try again.';
+                $('labQText').textContent = 'You scored ' + qs + ' out of ' + QS.length + '.';
+                $('labQOpts').innerHTML = ''; $('labQFb').textContent = t;
+                $('labQNext').textContent = 'Play again'; $('labQNext').dataset.again = '1';
+            }
+            function initQuiz() {
+                $('labQNext').addEventListener('click', function () {
+                    if (this.dataset.again) { delete this.dataset.again; qi = 0; qs = 0; $('labQScore').textContent = 0; showQ(); }
+                    else nextQ();
+                });
+                showQ();
+            }
+
+            function init() {
+                initOrbit();
+                $('labGo').addEventListener('click', startLaunch);
+                $('labVeh').addEventListener('change', resetLaunch);
+                resetLaunch();
+                ages(); $('labAge').addEventListener('input', ages);
+                trip(); $('labTrip').addEventListener('change', trip);
+                moon();
+                initQuiz();
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+        })();
+    </script>
+    <script id="fx-js">
+        (() => {
+            const $$ = (s, r = document) => [...r.querySelectorAll(s)], E = id => document.getElementById(id),
+                root = document.documentElement, RM = matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+            const D = { u: [0, 1, 1, 0], d: [0, -1, 1, 0], l: [-1, 0, 1, 0], r: [1, 0, 1, 0], tl: [-1, -1, 1, -3], tr: [1, -1, 1, 3], bl: [-1, 1, 1, 3], br: [1, 1, 1, -3], z: [0, 0, .8, 0] },
+                ORD = ['l', 'u', 'r', 'bl', 'z', 'br', 'tl', 'd', 'tr'],
+                SEL = $$('.vk').length ? '.vk-t,.vk-ui' : 'h1,h2,h3,h4,p,img,figure,form,table,li,button,.glass-panel,.grid>*',
+                SKIP = '.fixed,.sticky,header,nav,[id*=odal],[class*=odal],[id*=oast],.toast,[hidden],.rv,[class*=reveal-],[class*=animate-],.fx-top,.fx-bar,.fx-3d',
+                all = new Set(); let n = 0;
+            const VX = () => Math.min(innerWidth * .22, 260), VY = () => Math.min(innerHeight * .16, 130),
+                clampX = (el, x) => { const r = el.getBoundingClientRect(); return x < 0 ? Math.min(0, Math.max(x, 24 - r.right)) : x > 0 ? Math.max(0, Math.min(x, innerWidth - 24 - r.left)) : 0 },
+                clampY = (el, y) => { const r = el.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return y; return y < 0 ? Math.min(0, Math.max(y, 24 - r.bottom)) : y > 0 ? Math.max(0, Math.min(y, innerHeight - 24 - r.top)) : 0 },
+                pick = el => {
+                    const r = el.getBoundingClientRect(), k = n++, cx = (r.left + r.width / 2) / Math.max(1, innerWidth);
+                    if (r.width > innerWidth * .7 || (cx > .34 && cx < .66)) return ['u', 'd', 'z', 'bl', 'tr', 'br', 'tl'][k % 7];
+                    return cx <= .34 ? ['l', 'tl', 'l', 'bl'][k % 4] : ['r', 'tr', 'r', 'br'][k % 4]
+                };
+            const run = (el, st, d, t) => {
+                el.style.setProperty('--fx-d', d + 's'); el.style.setProperty('--fx-t', t + 's');
+                el.classList.add('fx-run'); el.classList.toggle('fx-in', st == 'in'); el.classList.toggle('fx-fade', st == 'fade');
+                clearTimeout(el._f); el._f = setTimeout(() => el.classList.remove('fx-run'), (d + t) * 1e3 + 150);
+            };
+            const show = (el, i) => el.classList.contains('fx-in') || run(el, 'in', Math.min(i, 7) * .09 + (el.dataset.fx == 'n' ? .15 : 0), .85);
+            const byPos = (a, b) => a.boundingClientRect.top - b.boundingClientRect.top || a.boundingClientRect.left - b.boundingClientRect.left;
+            const ioIn = new IntersectionObserver(es => { let i = 0; es.filter(e => e.isIntersecting).sort(byPos).forEach(e => show(e.target, i++)) }, { rootMargin: '0px 0px ' + Math.round(VY() - innerHeight * .09) + 'px 0px' }),
+                ioOut = new IntersectionObserver(es => es.forEach(e => { if (!e.isIntersecting && e.target.classList.contains('fx-in')) run(e.target, 'fade', 0, .4) })),
+                ioFar = new IntersectionObserver(es => es.forEach(e => { if (!e.isIntersecting) { const el = e.target; clearTimeout(el._f); el.classList.remove('fx-run', 'fx-in', 'fx-fade') } }), { rootMargin: '160px 0px' });
+
+            const prep = (r = document) => {
+                if (RM) return;
+                const f = innerWidth < 640 ? .5 : 1;
+                [...(r.matches && r.matches(SEL) ? [r] : []), ...$$(SEL, r)].forEach(el => {
+                    if (el.hasAttribute('data-fx') || el.closest(SKIP)) return;
+                    const par = el.parentElement, nest = par && par.closest('[data-fx]');
+                    let d;
+                    if (nest || el.tagName == 'P') d = 'u';
+                    else {
+                        const sib = [...par.children].filter(c => c.matches(SEL)), i = sib.indexOf(el);
+                        d = sib.length > 2 ? ORD[i % 9] : pick(el)
+                    }
+                    const [x, y, s, rt] = D[d], g = nest ? .4 : f;
+                    el.style.setProperty('--fx-x', Math.round(nest ? x * VX() * g : clampX(el, x * VX() * g)) + 'px'); el.style.setProperty('--fx-y', Math.round(nest ? y * VY() * g : clampY(el, y * VY() * g)) + 'px'); el.style.setProperty('--fx-s', nest ? .96 : s); el.style.setProperty('--fx-r', (nest ? 0 : rt) + 'deg');
+                    el.setAttribute('data-fx', nest ? 'n' : '');
+                    all.add(el); ioIn.observe(el); ioOut.observe(el); ioFar.observe(el);
+                });
+            };
+            const settle = () => { let i = 0; all.forEach(el => { const r = el.getBoundingClientRect(); if (r.height && r.bottom > 0 && r.top < innerHeight) show(el, i++) }) };
+
+            const own = !E('bar'), bar = own ? Object.assign(document.createElement('div'), { className: 'fx-bar' }) : null, top = document.createElement('button');
+            top.className = 'fx-top'; top.type = 'button'; top.setAttribute('aria-label', 'Back to top');
+            top.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+            top.onclick = () => scrollTo({ top: 0, behavior: 'smooth' });
+            document.body.append(...[bar, top].filter(Boolean));
+            let tick = 0;
+            const onScroll = () => {
+                if (tick) return; tick = requestAnimationFrame(() => {
+                    tick = 0;
+                    const max = Math.max(1, root.scrollHeight - innerHeight);
+                    if (own) bar.style.transform = `scaleX(${Math.min(1, scrollY / max)})`;
+                    top.classList.toggle('on', scrollY > innerHeight * .6);
+                    if (max - scrollY < 8) settle();
+                })
+            };
+            addEventListener('scroll', onScroll, { passive: true }); addEventListener('resize', onScroll);
+
+            const sw = window.switchTab; let tk = 0;
+            if (typeof sw == 'function') window.switchTab = function (id) {
+                const a = arguments, my = ++tk, nx = E('section-' + id),
+                    cur = $$('.tab-section').find(s => !s.classList.contains('hidden') && !s.classList.contains('fx-tab-out'));
+                $$('.fx-tab-out,.fx-tab-in').forEach(s => s.classList.remove('fx-tab-out', 'fx-tab-in'));
+                if (RM || !cur || !nx || cur === nx) return sw.apply(this, a);
+                cur.classList.add('fx-tab-out');
+                setTimeout(() => {
+                    if (my != tk) return; cur.classList.remove('fx-tab-out'); sw.apply(this, a);
+                    nx.classList.add('fx-tab-in'); setTimeout(() => nx.classList.remove('fx-tab-in'), 850)
+                }, 260);
+            };
+
+            if (E('Chandrayaan')) {
+                const m = document.createElement('div'); m.className = 'fx-3d'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', '3D viewer');
+                m.innerHTML = '<div><button type="button" class="fx-x" aria-label="Close 3D view">&times;</button><iframe title="Vikram lander and Pragyan rover in 3D" allow="fullscreen"></iframe></div>';
+                document.body.append(m);
+                const fr = m.querySelector('iframe'), x = m.querySelector('.fx-x'),
+                    shut = () => { m.classList.remove('on'); document.body.style.overflow = ''; setTimeout(() => { if (!m.classList.contains('on')) fr.src = 'about:blank' }, 500) },
+                    open3 = () => { fr.src = window.CosmosLang ? window.CosmosLang.url('chandayaan.html') : 'chandayaan.html'; m.classList.add('on'); document.body.style.overflow = 'hidden'; x.focus() };
+                x.onclick = shut; m.onclick = e => { if (e.target === m) shut() };
+                addEventListener('keydown', e => { if (e.key == 'Escape' && m.classList.contains('on')) shut() });
+                $$('button[onclick*="Vikram"],button[onclick*="Pragyan"]').forEach(b => {
+                    const v = document.createElement('button'); v.type = 'button'; v.textContent = 'Open 3D view'; v.style.marginLeft = '.5rem';
+                    v.className = b.className.split(/\s+/).filter(c => c != 'rv' && c != 'in').join(' '); v.onclick = open3; b.after(v)
+                });
+            }
+
+            new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(x => x.nodeType == 1 && prep(x)))).observe(document.body, { childList: true, subtree: true });
+            prep(); onScroll();
+            requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove('fx-wait')));
+        })();
+
+    </script>
+
+
+    <script id="astronaut3d-js">
+        (function () {
+            'use strict';
+            if (!window.THREE) return;
+            var THREE = window.THREE;
+            var ASTRO_PX = 44;                       /* astronaut height on screen, in pixels (make smaller/bigger here) */
+            var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            var canvas = document.createElement('canvas');
+            canvas.id = 'astronaut3dCanvas';
+            canvas.className = 'fixed inset-0 pointer-events-none z-1';
+            canvas.style.width = '100%'; canvas.style.height = '100%';
+            document.body.prepend(canvas);
+            var renderer;
+            try { renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true, premultipliedAlpha: true }); }
+            catch (e) { canvas.remove(); return; }
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.05;
+            renderer.setClearColor(0x000000, 0);
+
+            var scene = new THREE.Scene();
+            var camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 2000);   /* 1 world unit = 1 screen pixel */
+            camera.position.set(0, 0, 1000);
+            var W0 = 1, H0 = 1;
+            function resize() {
+                W0 = window.innerWidth; H0 = window.innerHeight;
+                renderer.setSize(W0, H0, false);
+                camera.left = -W0 / 2; camera.right = W0 / 2; camera.top = H0 / 2; camera.bottom = -H0 / 2;
+                camera.updateProjectionMatrix();
+            }
+            window.addEventListener('resize', resize); resize();
+
+            function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+
+            /* ---------- image-based light: dark sky, hot sun, bright Earth below ---------- */
+            var sunDir = new THREE.Vector3(-0.55, 0.62, 0.56).normalize();
+            var pm = new THREE.PMREMGenerator(renderer);
+            var es = new THREE.Scene();
+            es.add(new THREE.Mesh(new THREE.SphereGeometry(50, 32, 16), new THREE.MeshBasicMaterial({ color: 0x010206, side: THREE.BackSide })));
+            var envSun = new THREE.Mesh(new THREE.SphereGeometry(4, 16, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color(1, 0.97, 0.9).multiplyScalar(90) }));
+            envSun.position.copy(sunDir).multiplyScalar(40); es.add(envSun);
+            var envEarth = new THREE.Mesh(new THREE.SphereGeometry(60, 32, 16), new THREE.MeshBasicMaterial({ color: new THREE.Color(0.42, 0.62, 1.0).multiplyScalar(1.6) }));
+            envEarth.position.set(0, -64, -14); es.add(envEarth);
+            scene.environment = pm.fromScene(es, 0.02).texture;
+            es.traverse(function (o) { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+            pm.dispose();
+            var sun = new THREE.DirectionalLight(0xfff4e6, 2.3); sun.position.copy(sunDir).multiplyScalar(14); scene.add(sun);
+            var earthshine = new THREE.DirectionalLight(0x78a4ff, 0.42); earthshine.position.set(0.2, -1, 0.4); scene.add(earthshine);
+
+            /* ====== astronaut model (same as the game) ====== */
+            /* ---------- astronaut ---------- */
+            function noiseTex(size, fn, repeat) {
+                var c = document.createElement('canvas'); c.width = c.height = size;
+                var x = c.getContext('2d'); fn(x, size);
+                var t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(repeat, repeat); t.anisotropy = 4; return t;
+            }
+            var fabric = noiseTex(256, function (x, s) {
+                x.fillStyle = '#808080'; x.fillRect(0, 0, s, s);
+                for (var i = 0; i < 6000; i++) { var v = 105 + Math.random() * 50; x.fillStyle = 'rgb(' + v + ',' + v + ',' + v + ')'; x.fillRect(Math.random() * s, Math.random() * s, 1 + Math.random() * 3, 1); }
+                for (var j = 0; j < 4000; j++) { var w = 105 + Math.random() * 50; x.fillStyle = 'rgb(' + w + ',' + w + ',' + w + ')'; x.fillRect(Math.random() * s, Math.random() * s, 1, 1 + Math.random() * 3); }
+                x.strokeStyle = 'rgba(30,30,30,0.6)'; x.lineWidth = 2;
+                for (var k = 0; k <= s; k += 64) { x.beginPath(); x.moveTo(k, 0); x.lineTo(k, s); x.stroke(); x.beginPath(); x.moveTo(0, k); x.lineTo(s, k); x.stroke(); }
+            }, 3);
+            var foil = noiseTex(256, function (x, s) {
+                x.fillStyle = '#808080'; x.fillRect(0, 0, s, s);
+                for (var i = 0; i < 900; i++) { var v = Math.random() > 0.5 ? 200 : 60; x.fillStyle = 'rgba(' + v + ',' + v + ',' + v + ',0.35)'; x.beginPath(); x.ellipse(Math.random() * s, Math.random() * s, 3 + Math.random() * 16, 2 + Math.random() * 10, Math.random() * 3, 0, 6.28); x.fill(); }
+            }, 2);
+
+            function fab(hex, rough) { return new THREE.MeshPhysicalMaterial({ color: hex, roughness: rough, metalness: 0, bumpMap: fabric, bumpScale: 1.5, sheen: 0.5, sheenRoughness: 0.6, sheenColor: new THREE.Color(0xffffff) }); }
+            var mWhite = fab(0xeeeeef, 0.8);
+            var mWhite2 = fab(0xe3e3e5, 0.84);
+            var mGray = new THREE.MeshStandardMaterial({ color: 0x9a9da4, roughness: 0.5, metalness: 0.45 });
+            var mCuff = new THREE.MeshStandardMaterial({ color: 0x7e8794, roughness: 0.38, metalness: 0.75 });
+            var mDark = new THREE.MeshStandardMaterial({ color: 0x1b1d24, roughness: 0.55, metalness: 0.25 });
+            var mRubber = new THREE.MeshStandardMaterial({ color: 0x15161b, roughness: 0.9, metalness: 0 });
+            var mFrame = new THREE.MeshStandardMaterial({ color: 0xcfd1d6, roughness: 0.5, metalness: 0.5, bumpMap: fabric, bumpScale: 0.5 });
+            var mGold = new THREE.MeshStandardMaterial({ color: 0xcf9a38, roughness: 0.3, metalness: 1, bumpMap: foil, bumpScale: 2.5 });
+            var mVisor = new THREE.MeshPhysicalMaterial({ color: 0xe6a93a, roughness: 0.04, metalness: 1, envMapIntensity: 1.5, clearcoat: 1, clearcoatRoughness: 0.03 });
+            var mRed = new THREE.MeshStandardMaterial({ color: 0xc72b2b, roughness: 0.7, metalness: 0 });
+
+            var astro = new THREE.Group();
+            var body = new THREE.Group();
+            astro.add(body);
+            scene.add(astro);
+            function M(geo, mat, x, y, z, parent) { var m = new THREE.Mesh(geo, mat); m.position.set(x || 0, y || 0, z || 0); if (parent) parent.add(m); return m; }
+            function cap(r, l, mat) { return new THREE.Mesh(new THREE.CapsuleGeometry(r, l, 10, 24), mat); }
+            function box(w, h, d, mat, x, y, z, parent) { return M(new THREE.BoxGeometry(w, h, d), mat, x, y, z, parent); }
+            function cyl(rt, rb, h, mat, x, y, z, parent, seg) { return M(new THREE.CylinderGeometry(rt, rb, h, seg || 24), mat, x, y, z, parent); }
+            function ball(r, mat, x, y, z, parent) { return M(new THREE.SphereGeometry(r, 32, 20), mat, x, y, z, parent); }
+            function ring(R0, tube, mat, x, y, z, parent) { var t = M(new THREE.TorusGeometry(R0, tube, 12, 40), mat, x, y, z, parent); t.rotation.x = Math.PI / 2; return t; }
+            function pleats(parent, r, n, gap, y0, mat) { for (var i = 0; i < n; i++) ring(r, 0.012, mat, 0, y0 + i * gap, 0, parent); }
+            function hose(pts, rad, mat) { var c = new THREE.CatmullRomCurve3(pts.map(function (p) { return new THREE.Vector3(p[0], p[1], p[2]); })); return M(new THREE.TubeGeometry(c, 48, rad, 10, false), mat, 0, 0, 0, body); }
+
+            // torso (hard upper torso) and pelvis
+            var torso = M(new THREE.CapsuleGeometry(0.25, 0.28, 14, 36), mWhite, 0, 0.03, 0, body); torso.scale.set(1.22, 1, 0.92);
+            var pelvis = ball(0.24, mWhite2, 0, -0.34, 0.01, body); pelvis.scale.set(1.2, 0.78, 0.96);
+            cyl(0.255, 0.255, 0.06, mCuff, 0, -0.25, 0, body, 40).scale.set(1.15, 1, 0.9);
+            cyl(0.26, 0.26, 0.02, mGray, 0, -0.215, 0, body, 40).scale.set(1.15, 1, 0.9);
+            // chest controller
+            box(0.3, 0.17, 0.09, mGray, 0, 0.1, 0.235, body);
+            box(0.2, 0.07, 0.01, mDark, 0, 0.12, 0.285, body);
+            [[-0.1, 0.05, 0xff5a3c], [-0.04, 0.05, 0x6ee0c0], [0.02, 0.05, 0xffffff], [0.08, 0.05, 0xffd25c]].forEach(function (b) {
+                var btn = cyl(0.016, 0.016, 0.014, new THREE.MeshStandardMaterial({ color: b[2], roughness: 0.5, emissive: b[2], emissiveIntensity: 0.25 }), b[0], b[1], 0.285, body, 12); btn.rotation.x = Math.PI / 2;
+            });
+            [-0.12, 0.12].forEach(function (x) { var cn = cyl(0.025, 0.025, 0.05, mCuff, x, -0.01, 0.255, body, 16); cn.rotation.x = Math.PI / 2; });
+
+            // NASA name patch (left of chest on screen) and Indian flag patch (right)
+            var patchTex = (function () {
+                var c = document.createElement('canvas'); c.width = 256; c.height = 96; var x = c.getContext('2d');
+                x.fillStyle = '#f2f2f4'; x.fillRect(0, 0, 256, 96);
+                x.fillStyle = '#c4242b'; x.font = 'italic 800 64px Helvetica, Arial, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('NASA', 128, 50);
+                var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
+            })();
+            var patch = M(new THREE.PlaneGeometry(0.15, 0.056), new THREE.MeshStandardMaterial({ map: patchTex, roughness: 0.85 }), -0.2, 0.2, 0.182, body); patch.rotation.y = -0.55;
+            var flagTex = (function () {
+                var W = 384, H = 256, c = document.createElement('canvas'); c.width = W; c.height = H; var x = c.getContext('2d');
+                x.fillStyle = '#ff9933'; x.fillRect(0, 0, W, H / 3);
+                x.fillStyle = '#ffffff'; x.fillRect(0, H / 3, W, H / 3);
+                x.fillStyle = '#138808'; x.fillRect(0, 2 * H / 3, W, H / 3 + 1);
+                var cx = W / 2, cy = H / 2, r = H / 6 - 3;
+                x.strokeStyle = '#000080'; x.lineWidth = 4; x.beginPath(); x.arc(cx, cy, r, 0, 6.2832); x.stroke();
+                x.lineWidth = 2;
+                for (var i = 0; i < 24; i++) { var a = i * Math.PI / 12; x.beginPath(); x.moveTo(cx, cy); x.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); x.stroke(); }
+                x.fillStyle = '#000080'; x.beginPath(); x.arc(cx, cy, 5, 0, 6.2832); x.fill();
+                for (var k = 0; k < 24; k++) { var b = k * Math.PI / 12 + Math.PI / 24; x.beginPath(); x.arc(cx + Math.cos(b) * (r - 4), cy + Math.sin(b) * (r - 4), 2.2, 0, 6.2832); x.fill(); }
+                x.strokeStyle = 'rgba(0,0,0,0.35)'; x.lineWidth = 6; x.strokeRect(0, 0, W, H);
+                var t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t;
+            })();
+            var flag = M(new THREE.PlaneGeometry(0.135, 0.09), new THREE.MeshStandardMaterial({ map: flagTex, roughness: 0.8 }), 0.2, 0.2, 0.182, body); flag.rotation.y = 0.55;
+
+            // neck ring and helmet
+            var neck = M(new THREE.TorusGeometry(0.19, 0.035, 14, 44), mCuff, 0, 0.37, 0.03, body); neck.rotation.x = Math.PI / 2;
+            var helmet = new THREE.Group(); helmet.position.set(0, 0.57, 0.04); body.add(helmet);
+            ball(0.26, mWhite, 0, 0, 0, helmet);
+            ball(0.235, mDark, 0, 0, 0.012, helmet);
+            var visor = M(new THREE.SphereGeometry(0.268, 64, 40, Math.PI * 0.14, Math.PI * 0.72, Math.PI * 0.26, Math.PI * 0.44), mVisor, 0, 0, 0, helmet);
+            visor.scale.set(1, 1, 1.02);
+            M(new THREE.SphereGeometry(0.275, 48, 20, Math.PI * 0.08, Math.PI * 0.84, Math.PI * 0.1, Math.PI * 0.2), mWhite, 0, 0, 0, helmet);
+            var chin = M(new THREE.TorusGeometry(0.16, 0.022, 10, 36, Math.PI), mCuff, 0, -0.11, 0.15, helmet); chin.rotation.set(Math.PI * 0.62, 0, Math.PI);
+            var bumper = M(new THREE.TorusGeometry(0.255, 0.018, 10, 48), mGray, 0, 0.05, 0, helmet); bumper.rotation.x = Math.PI / 2;
+            var stalk = cyl(0.012, 0.012, 0.3, mGray, 0.2, 0.36, -0.03, helmet, 10); stalk.rotation.z = -0.25;
+            var cam = new THREE.Group(); cam.position.set(0.26, 0.5, -0.02); helmet.add(cam);
+            box(0.1, 0.085, 0.15, mDark, 0, 0, 0, cam);
+            var lens = cyl(0.032, 0.036, 0.07, mCuff, 0, 0, 0.1, cam, 20); lens.rotation.x = Math.PI / 2;
+            var lens2 = cyl(0.022, 0.022, 0.01, new THREE.MeshStandardMaterial({ color: 0x101830, roughness: 0.05, metalness: 1 }), 0, 0, 0.138, cam, 20); lens2.rotation.x = Math.PI / 2;
+            box(0.045, 0.06, 0.07, mGray, -0.27, 0.04, 0.07, helmet);
+            box(0.045, 0.06, 0.07, mGray, 0.27, 0.04, 0.07, helmet);
+
+            // arms
+            function makeArm(s) {
+                var sh = new THREE.Group(); sh.position.set(s * 0.37, 0.22, 0); body.add(sh);
+                ball(0.13, mWhite, 0, 0, 0, sh);
+                ring(0.115, 0.014, mCuff, 0, -0.04, 0, sh);
+                var up = new THREE.Group(); sh.add(up);
+                var ua = cap(0.088, 0.2, mWhite2); ua.position.y = -0.2; up.add(ua);
+                var el = new THREE.Group(); el.position.y = -0.385; up.add(el);
+                ball(0.098, mWhite2, 0, 0, 0, el);
+                pleats(el, 0.094, 3, 0.04, -0.06, mWhite2);
+                var fa = cap(0.078, 0.18, mWhite2); fa.position.y = -0.18; el.add(fa);
+                var wr = new THREE.Group(); wr.position.y = -0.35; el.add(wr);
+                cyl(0.09, 0.09, 0.055, mCuff, 0, 0, 0, wr, 32);
+                ring(0.088, 0.012, mGray, 0, -0.03, 0, wr);
+                var glove = cap(0.066, 0.06, mWhite); glove.position.y = -0.1; glove.scale.set(1.12, 1, 0.78); wr.add(glove);
+                var thumb = new THREE.Group(); thumb.position.set(-s * 0.06, -0.09, 0.02); thumb.rotation.z = s * 0.8; wr.add(thumb);
+                var t1 = cap(0.022, 0.03, mWhite); t1.position.y = -0.03; thumb.add(t1);
+                for (var f = 0; f < 4; f++) {
+                    var fg = new THREE.Group(); fg.position.set(-0.04 + f * 0.027, -0.155, 0); fg.rotation.x = -0.35; wr.add(fg);
+                    var f1 = cap(0.0185, 0.03, mWhite); f1.position.y = -0.03; fg.add(f1);
+                    var f2g = new THREE.Group(); f2g.position.y = -0.065; f2g.rotation.x = -0.5; fg.add(f2g);
+                    var f2 = cap(0.0165, 0.025, mWhite); f2.position.y = -0.025; f2g.add(f2);
+                }
+                return { sh: sh, up: up, el: el, wr: wr, s: s };
+            }
+            var armR = makeArm(1), armL = makeArm(-1);
+
+            // legs
+            function makeLeg(s) {
+                var hip = new THREE.Group(); hip.position.set(s * 0.15, -0.37, 0); body.add(hip);
+                ball(0.15, mWhite2, 0, 0, 0, hip);
+                var th = cap(0.128, 0.26, mWhite2); th.position.y = -0.24; hip.add(th);
+                var kn = new THREE.Group(); kn.position.y = -0.5; hip.add(kn);
+                ball(0.117, mWhite2, 0, 0, 0, kn);
+                pleats(kn, 0.114, 3, 0.045, -0.07, mWhite2);
+                var sn = cap(0.108, 0.26, mWhite2); sn.position.y = -0.24; kn.add(sn);
+                [-0.2, -0.31].forEach(function (y) { ring(0.131, 0.011, mRed, 0, y, 0, hip); });
+                [-0.14, -0.25].forEach(function (y) { ring(0.113, 0.011, mRed, 0, y, 0, kn); });
+                var an = new THREE.Group(); an.position.y = -0.5; kn.add(an);
+                ball(0.088, mCuff, 0, 0, 0, an);
+                pleats(an, 0.095, 2, 0.035, -0.05, mWhite2);
+                var boot = cap(0.098, 0.08, mWhite); boot.rotation.x = Math.PI / 2; boot.position.set(0, -0.12, 0.09); boot.scale.set(1, 1.1, 0.85); an.add(boot);
+                box(0.17, 0.04, 0.3, mRubber, 0, -0.195, 0.1, an);
+                box(0.17, 0.02, 0.08, mGray, 0, -0.165, -0.06, an);
+                return { hip: hip, kn: kn, an: an, s: s };
+            }
+            var legL = makeLeg(-1), legR = makeLeg(1);
+
+            // umbilical hoses from the chest controller around to the backpack
+            var mHose = new THREE.MeshStandardMaterial({ color: 0xb8bbc2, roughness: 0.6, metalness: 0.3 });
+            [-1, 1].forEach(function (s) {
+                hose([[s * 0.12, -0.01, 0.27], [s * 0.26, -0.08, 0.24], [s * 0.34, -0.1, 0.1], [s * 0.34, -0.06, -0.1], [s * 0.28, -0.02, -0.25]], 0.017, mHose);
+            });
+
+            // manned maneuvering unit backpack
+            var mmu = new THREE.Group(); mmu.position.set(0, 0.04, -0.41); body.add(mmu);
+            box(0.62, 0.78, 0.34, mFrame, 0, 0, 0, mmu);
+            box(0.58, 0.28, 0.025, mGray, 0, 0.18, -0.18, mmu);
+            box(0.56, 0.3, 0.026, mGold, 0, -0.2, -0.18, mmu);
+            box(0.03, 0.74, 0.3, mGold, -0.325, 0, 0, mmu);
+            box(0.03, 0.74, 0.3, mGold, 0.325, 0, 0, mmu);
+            [-0.17, 0.17].forEach(function (x) { cyl(0.085, 0.085, 0.5, mCuff, x, -0.05, -0.27, mmu, 28); cyl(0.03, 0.03, 0.05, mDark, x, 0.23, -0.27, mmu, 14); });
+            [-0.2, 0, 0.2].forEach(function (x) { box(0.012, 0.74, 0.012, mGray, x, 0, 0.176, mmu); });
+            var handle = M(new THREE.TorusGeometry(0.1, 0.012, 8, 24, Math.PI), mCuff, 0, 0.39, -0.1, mmu); handle.rotation.set(0, 0, 0);
+            function nz(parent, x, y, z, rx, rz) { var n = cyl(0.03, 0.013, 0.07, mDark, x, y, z, parent, 14); n.rotation.x = rx; n.rotation.z = rz; }
+            [[-1, 1], [1, 1], [-1, -1], [1, -1]].forEach(function (c) {
+                nz(mmu, c[0] * 0.34, c[1] * 0.3, -0.05, 0, -c[0] * Math.PI / 2);
+                nz(mmu, c[0] * 0.2, c[1] * 0.4, -0.05, 0, c[1] > 0 ? 0 : Math.PI);
+                nz(mmu, c[0] * 0.2, c[1] * 0.28, -0.18, -Math.PI / 2, 0);
+            });
+            [-1, 1].forEach(function (s) {
+                var arm = new THREE.Group(); arm.position.set(s * 0.54, 0.0, 0.08); mmu.add(arm);
+                box(0.1, 0.1, 0.78, mFrame, 0, 0, 0.12, arm);
+                box(0.12, 0.012, 0.3, mGold, 0, 0.056, 0.0, arm);
+                box(0.09, 0.07, 0.12, mDark, 0, 0, 0.55, arm);
+                cyl(0.012, 0.012, 0.09, mCuff, 0, 0.06, 0.55, arm, 10);
+                box(0.08, 0.06, 0.06, mFrame, s * -0.2, 0, -0.18, arm);
+                box(0.34, 0.07, 0.06, mFrame, s * -0.17, 0, -0.26, arm);
+            });
+            body.traverse(function (o) { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+            patch.castShadow = false; flag.castShadow = false;
+
+            /* the model spans about 2.4 units head to toe: scale it to ASTRO_PX and centre it on the group origin */
+            var UNIT = ASTRO_PX / 2.4;
+            body.position.y = 0.37;
+            astro.scale.setScalar(UNIT);
+
+            /* ====== rigid-body tumble (same physics as the game) ====== */
+            var INERTIA = new THREE.Vector3(0.32, 0.10, 0.24);
+            var Q0 = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.08, 0.5, 0, 'YXZ'));
+            var S = { pos: new THREE.Vector3(), vel: new THREE.Vector3(), q: Q0.clone(), L: new THREE.Vector3() };
+            var tq = new THREE.Quaternion(), W = new THREE.Vector3(), tv = new THREE.Vector3(), tv2 = new THREE.Vector3(), dq = new THREE.Quaternion(), axis = new THREE.Vector3();
+            var qe = new THREE.Quaternion(), qi = new THREE.Quaternion(), qt = new THREE.Quaternion(), eu = new THREE.Euler(), gv = new THREE.Vector3();
+            function omegaWorld(out) {
+                tq.copy(S.q).invert();
+                out.copy(S.L).applyQuaternion(tq);
+                out.set(out.x / INERTIA.x, out.y / INERTIA.y, out.z / INERTIA.z);
+                return out.applyQuaternion(S.q);
+            }
+            /* drifting across the page: the astronaut keeps moving until it bumps an edge, then tumbles and recovers */
+            var MARGIN = UNIT * 1.2;
+            S.pos.set((Math.random() - 0.5) * (window.innerWidth - 4 * MARGIN), (Math.random() - 0.5) * (window.innerHeight - 4 * MARGIN), 0);
+            S.vel.set(Math.random() < 0.5 ? 108 : -108, Math.random() < 0.5 ? 84 : -84, 0);
+            function bump(sx, sy) {
+                var lever = (Math.random() - 0.5) * 1.2;
+                if (sx) { tv.set(-2 * gv.x, 0, 0); tv2.set(sx * 1.2, lever, 0); }
+                else { tv.set(0, -2 * gv.y, 0); tv2.set(lever, sy * 1.2, 0); }
+                S.L.add(tv2.cross(tv).multiplyScalar(0.18));
+            }
+            function physicsStep(h) {
+                gv.set(S.vel.x / 60, S.vel.y / 60, 0);
+                eu.set(0.08, 0.5 + gv.x * 0.12, -gv.x * 0.14 + gv.y * 0.03, 'YXZ'); qt.setFromEuler(eu);
+                qe.copy(qt).multiply(qi.copy(S.q).invert()); if (qe.w < 0) { qe.x = -qe.x; qe.y = -qe.y; qe.z = -qe.z; qe.w = -qe.w; }
+                var sn = Math.sqrt(1 - qe.w * qe.w); if (sn > 1e-4) { axis.set(qe.x / sn, qe.y / sn, qe.z / sn); S.L.addScaledVector(axis, 5 * Math.acos(Math.min(1, qe.w)) * h); }
+                S.L.multiplyScalar(Math.exp(-2.5 * h));
+                S.pos.addScaledVector(S.vel, h);
+                omegaWorld(W);
+                var wl = W.length();
+                if (wl > 2) { var kk = 2 / wl; S.L.multiplyScalar(kk); W.multiplyScalar(kk); wl = 2; }
+                if (wl > 1e-6) { axis.copy(W).multiplyScalar(1 / wl); dq.setFromAxisAngle(axis, wl * h); S.q.premultiply(dq).normalize(); }
+                var bx = W0 / 2 - MARGIN, by = H0 / 2 - MARGIN;
+                if (S.pos.x > bx && S.vel.x > 0) { S.pos.x = bx; bump(1, 0); S.vel.x *= -1; }
+                if (S.pos.x < -bx && S.vel.x < 0) { S.pos.x = -bx; bump(-1, 0); S.vel.x *= -1; }
+                if (S.pos.y > by && S.vel.y > 0) { S.pos.y = by; bump(0, 1); S.vel.y *= -1; }
+                if (S.pos.y < -by && S.vel.y < 0) { S.pos.y = -by; bump(0, -1); S.vel.y *= -1; }
+            }
+
+            /* ---- limb lag: loose joints respond to angular acceleration ---- */
+            var lag = new THREE.Vector3(), lagV = new THREE.Vector3(), wbPrev = new THREE.Vector3(), alpha = new THREE.Vector3(), wb = new THREE.Vector3();
+            function pose(t, dt) {
+                tq.copy(S.q).invert();
+                omegaWorld(W); wb.copy(W).applyQuaternion(tq);
+                alpha.copy(wb).sub(wbPrev).multiplyScalar(1 / Math.max(dt, 0.001)); wbPrev.copy(wb);
+                alpha.x = clamp(alpha.x, -8, 8); alpha.y = clamp(alpha.y, -8, 8); alpha.z = clamp(alpha.z, -8, 8);
+                lagV.addScaledVector(lag, -26 * dt).addScaledVector(lagV, -4.5 * dt).addScaledVector(alpha, -0.03 * dt * 60 * 0.6);
+                lag.addScaledVector(lagV, dt);
+                lag.x = clamp(lag.x, -0.5, 0.5); lag.y = clamp(lag.y, -0.5, 0.5); lag.z = clamp(lag.z, -0.5, 0.5);
+                var rm = reduce ? 0.35 : 1;
+                var a = Math.sin(t * 0.7) * 0.05 * rm, b = Math.sin(t * 0.55 + 1.3) * 0.06 * rm, c = Math.sin(t * 0.4 + 2.4) * 0.04 * rm;
+                armR.sh.rotation.z = 0.3 + a * 0.5 + lag.z * 0.9; armR.up.rotation.x = -0.95 + a + lag.x * 1.0; armR.el.rotation.x = -0.75 + b + lag.x * 0.5; armR.wr.rotation.x = -0.1;
+                armL.sh.rotation.z = -0.5 + b * 0.5 + lag.z * 0.9; armL.up.rotation.x = -1.35 + b + lag.x * 1.0; armL.el.rotation.x = -1.45 + a + lag.x * 0.5; armL.wr.rotation.x = -0.2;
+                legL.hip.rotation.x = -0.22 + c - lag.x * 0.8; legL.kn.rotation.x = 0.42 + b * 0.6 - lag.x * 0.5; legL.an.rotation.x = 0.28 + a * 0.4; legL.hip.rotation.z = -0.1 - lag.z * 0.6;
+                legR.hip.rotation.x = -0.05 - c - lag.x * 0.8; legR.kn.rotation.x = 0.2 - b * 0.6 - lag.x * 0.5; legR.an.rotation.x = 0.35 - a * 0.4; legR.hip.rotation.z = 0.1 - lag.z * 0.6;
+                helmet.rotation.x = lag.x * 0.25; helmet.rotation.z = lag.z * 0.25;
+            }
+
+            /* ====== loop ====== */
+            var T = 0, last = performance.now();
+            function frame(now) {
+                var dt = Math.min(0.05, (now - last) / 1000); last = now;
+                T += dt;
+                var steps = Math.max(1, Math.ceil(dt / 0.008));
+                for (var s = 0; s < steps; s++) physicsStep(dt / steps);
+                astro.position.copy(S.pos);
+                astro.quaternion.copy(S.q);
+                pose(T, dt);
+                renderer.render(scene, camera);
+                requestAnimationFrame(frame);
+            }
+            requestAnimationFrame(frame);
+        })();
+    </script>
+
+</body>
+
+</html>
