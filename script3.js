@@ -46,7 +46,7 @@
       ['Drishti combines which two sensors?', ['Radio + GPS', 'SAR + Electro-Optical', 'Laser + Sonar', 'Infrared + Magnetometer'], 1, 'Radar (SAR) sees through clouds; optical gives colour images.'],
       ['Drishti orbits at about…', ['500 km', '36,000 km', '1.5 million km', '50 km'], 0, 'It is in a ~500 km sun-synchronous orbit.'],
       ['Why is SAR useful?', ['Works day, night and through clouds', 'Only works in daylight', 'Makes the satellite lighter', 'Reduces cost to zero'], 0, 'Radar supplies its own signal, so weather and darkness don\'t block it.']] },
-    game: { t: 'Spacewalk Physics', i: '🧑‍🚀', b: 'Spacewalker', q: [
+    game: { t: 'Spacewalk Physics', i: '🚀', b: 'Spacewalker', q: [
       ['In space, a drifting tool keeps moving unless…', ['It gets tired', 'A force acts on it', 'Time passes', 'It is dark'], 1, 'Newton\'s first law: motion changes only when a force acts.'],
       ['Why is there almost no air resistance in orbit?', ['Gravity is zero', 'It is nearly a vacuum', 'Tools are light', 'Magnets'], 1, 'Orbit is nearly a vacuum, so little drag slows objects.'],
       ['Why do astronauts use tethers?', ['To breathe', 'To avoid drifting away', 'For communication only', 'For heat'], 1, 'Nothing stops a drifting astronaut without a tether or thrust.']] }
