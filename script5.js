@@ -209,7 +209,7 @@
     function mount() {
         var t = document.getElementById('section-teacher'); if (!t || document.getElementById('section-skills')) return;
         var s = document.createElement('section'); s.id = 'section-skills'; s.className = 'tab-section hidden py-10';
-        s.innerHTML = '<h2 class="font-orbitron text-3xl sm:text-4xl font-bold mb-2">Skill Lab</h2><p class="mb-6" style="opacity:.75">Learn it, then build it. Clear challenges to grow your Skill Profile and earn XP.</p><div id="skRoot"></div>';
+        s.innerHTML = '<h2 class="font-orbitron text-3xl sm:text-4xl font-bold mb-2">Skill Lab</h2><p class="mb-6" style="opacity:.75">Learn it, then build it. Clear challenges to grow your Skill Profile and earn XP.</p><a href="index12.html" class="glass-panel" style="display:flex;gap:14px;align-items:center;padding:16px 18px;border-radius:16px;margin-bottom:18px;text-decoration:none;color:inherit"><span style="font-size:34px">🌍</span><span><b class="font-orbitron">Customise your own Earth</b><br><span style="opacity:.75;font-size:13px">Set oxygen, CO₂, water, distance from the Sun, air pressure, gravity and magnetic field, then see if life survives. Take the Mars, Venus and Snowball challenges for XP.</span></span></a><div id="skRoot"></div>';
         t.parentNode.insertBefore(s, t.nextSibling);
         var nt = document.getElementById('nav-teacher');
         if (nt) { var b = nt.cloneNode(true); b.id = 'nav-skills'; b.textContent = 'Skills'; b.setAttribute('onclick', "switchTab('skills')"); nt.parentNode.insertBefore(b, nt.nextSibling); }
