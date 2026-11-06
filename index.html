@@ -2800,6 +2800,11 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="mb-3"><label class="th-lbl" for="thStyle">Paper style</label><select id="thStyle"
+                                class="lab-in">
+                                <option value="std">Standard</option>
+                                <option value="nep" selected>NEP 2020 competency-based (NCERT aligned)</option>
+                            </select></div>
                         <div class="mb-3"><label class="th-lbl" for="thSchool">School name</label><input id="thSchool"
                                 class="lab-in" placeholder="e.g. Kendriya Vidyalaya, Kanpur"></div>
                         <div class="mb-4"><label class="th-lbl" for="thTeacher">Teacher name (optional)</label><input
@@ -4354,11 +4359,32 @@
             var $ = function (id) { return document.getElementById(id); };
             var TOPICS = { all: 'Mixed space science', i: 'ISRO and Indian missions', s: 'Solar system and planets', r: 'Rockets and orbits', t: 'Space science and technology' };
             var BANDS = { 1: '6-8', 2: '9-10', 3: '11-12' };
-            var MARKS = { m: 1, f: 1, s: 2, l: 4 };
-            var SECT = { m: ['A', 'Multiple choice', 'Choose the correct option.'], f: ['B', 'Fill in the blanks', 'Write the missing word or value.'], s: ['C', 'Short answers', 'Answer in 2 to 3 sentences.'], l: ['D', 'Long answers', 'Answer in detail, with reasons or working.'] };
+            var MARKS = { m: 1, a: 1, f: 1, s: 2, c: 4, l: 4 }, ORD = { m: 0, a: 1, f: 2, s: 3, c: 4, l: 5 }, GR = { m: 'm', a: 'm', f: 'f', s: 's', c: 'c', l: 'l' };
+            var SECT = { m: ['A', 'Multiple choice and assertion–reason', 'Choose the correct option. For assertion–reason questions, pick (a), (b), (c) or (d) as given.'], f: ['B', 'Fill in the blanks', 'Write the missing word or value.'], s: ['C', 'Short answers', 'Answer in 2 to 3 sentences. Show working for numerical questions.'], c: ['D', 'Case-based questions', 'Read each case carefully and answer all the parts.'], l: ['E', 'Long answers', 'Answer in detail, with reasons or working.'] };
 
             /* [topic, level, type, question, answer, wrong options (mcq only)] */
+            var AR = ['Both A and R are true, and R is the correct explanation of A', 'Both A and R are true, but R is not the correct explanation of A', 'A is true, but R is false', 'A is false, but R is true'], CL = { R: 'Remembering', U: 'Understanding', AP: 'Applying', AN: 'Analysing' };
+            /* rows with a 7th item 'code|source' are NEP 2020 competency-based questions (code: R, U, AP, AN) */
             var Q = [
+                ['i', 1, 'm', 'Which ancient Indian astronomer, in the Aryabhatiya (499 CE), explained that Earth rotates on its own axis?', 'Aryabhata', ['Varahamihira', 'Brahmagupta', 'Bhaskara II'], 'R|NEP 2020 Indian Knowledge Systems · ISRO'],
+                ['s', 1, 'a', 'Assertion (A): We always see the same face of the Moon from Earth. Reason (R): The Moon takes the same time (about 27.3 days) to spin once on its axis as to orbit Earth once.', AR[0], null, 'U|NCERT Class 6–8 Science (Earth, Moon and Sun)'],
+                ['s', 1, 'a', 'Assertion (A): Mercury is the hottest planet in the Solar System. Reason (R): Mercury is the planet closest to the Sun.', AR[3], null, 'AN|NCERT Class 8 Science (Stars and the Solar System)'],
+                ['s', 1, 's', 'Explain why we have day and night on Earth.', 'Earth spins (rotates) on its axis once in about 24 hours. The half facing the Sun has day and the half facing away has night.', null, 'U|NCERT Class 6 Geography (Motions of the Earth)'],
+                ['i', 1, 'c', 'Case: On 23 August 2023, Chandrayaan-3’s Vikram lander touched down near the Moon’s south pole. The Moon has almost no atmosphere, so the lander slowed itself with rocket thrusters.\n(a) Why could Vikram not use parachutes? [1]\n(b) Name the rover that Vikram carried. [1]\n(c) Give one reason why scientists are interested in the south polar region. [2]', '(a) Parachutes need air to push against, and the Moon has almost none. (b) Pragyan. (c) Permanently shadowed craters there may hold water ice, useful for future missions.', null, 'AP|ISRO Chandrayaan-3 · NCERT Class 8 Science'],
+                ['r', 2, 'a', 'Assertion (A): A rocket can accelerate in the vacuum of space. Reason (R): The rocket pushes exhaust gas backwards and the gas pushes the rocket forwards.', AR[0], null, 'U|NCERT Class 9 Science (Force and Laws of Motion)'],
+                ['i', 2, 'a', 'Assertion (A): Aditya-L1 can watch the Sun without eclipses. Reason (R): L1 lies on the Earth–Sun line, about 1.5 million km from Earth, so Earth and the Moon do not block its view.', AR[0], null, 'U|ISRO Aditya-L1 · NCERT Class 9 Science (Gravitation)'],
+                ['r', 2, 'm', 'A satellite close to Earth moves at about 7.8 km/s, which is less than the escape speed of 11.2 km/s. What happens to it?', 'It stays in orbit around Earth', ['It escapes Earth’s gravity', 'It falls straight down at once', 'It flies to the Moon'], 'AP|NCERT Class 9 Science / Class 11 Physics (Gravitation)'],
+                ['s', 2, 'm', 'An object weighs 60 N on Earth. The Moon’s gravity is about one-sixth of Earth’s. What would it weigh on the Moon?', '10 N', ['60 N', '360 N', '6 N'], 'AP|NCERT Class 9 Science (Gravitation: mass and weight)'],
+                ['s', 2, 's', 'An astronaut has a mass of 70 kg. Find the weight on Mars, where g = 3.7 m/s². Does the mass change?', 'Weight = mg = 70 × 3.7 = 259 N. The mass stays 70 kg because mass does not depend on location.', null, 'AP|NCERT Class 9 Science (Gravitation)'],
+                ['i', 2, 'c', 'Case: India’s Mars Orbiter Mission (Mangalyaan) was launched on 5 November 2013 and entered Mars orbit on 24 September 2014 on its first attempt. Its cost was about ₹450 crore, among the lowest for an interplanetary mission.\n(a) Which ISRO rocket launched it? [1]\n(b) About how many months did the journey take? [1]\n(c) Why is a low-cost mission important for a developing country? [2]', '(a) PSLV (PSLV-C25). (b) About 10 to 11 months. (c) It builds science and technology skills on a smaller budget, leaves money for other national needs and shows self-reliance.', null, 'AP|ISRO Mangalyaan · NEP 2020 (critical thinking)'],
+                ['s', 2, 'l', 'Venus is hotter than Mercury although it is farther from the Sun. Explain this using the greenhouse effect, and name two actions students can take under Mission LiFE to reduce greenhouse gases.', 'Venus has a very thick CO₂ atmosphere that traps heat (a runaway greenhouse effect), so its surface is about 464 °C, while Mercury has almost no air to hold heat. More CO₂ also warms Earth’s climate. Mission LiFE actions: save electricity, cycle or use public transport, reduce waste, plant trees.', null, 'AN|NCERT Class 7–10 Science · Mission LiFE (NEP 2020 environmental education)'],
+                ['r', 3, 'a', 'Assertion (A): A geostationary satellite must orbit above the equator. Reason (R): An inclined orbit with a 24-hour period makes the satellite swing north and south, so it does not stay above one point.', AR[0], null, 'U|NCERT Class 11 Physics (Gravitation)'],
+                ['r', 3, 'a', 'Assertion (A): The orbital speed of a satellite decreases as its orbital radius increases. Reason (R): Orbital speed is v = √(GM/r).', AR[0], null, 'U|NCERT Class 11 Physics (Gravitation)'],
+                ['r', 3, 'm', 'The time period of a satellite orbiting just above Earth’s surface (R ≈ 6400 km, g = 9.8 m/s²) is about', '84 minutes', ['24 hours', '12 hours', '10 minutes'], 'AP|NCERT Class 11 Physics (Gravitation)'],
+                ['s', 3, 'm', 'A planet orbits the Sun at 4 times Earth’s distance. By Kepler’s third law, its period in Earth years is', '8', ['4', '16', '64'], 'AP|NCERT Class 11 Physics (Kepler’s laws)'],
+                ['s', 3, 's', 'Calculate the escape speed from Mars (M = 6.4 × 10²³ kg, R = 3.4 × 10⁶ m, G = 6.67 × 10⁻¹¹ N m² kg⁻²).', 'v = √(2GM/R) = √(2 × 6.67×10⁻¹¹ × 6.4×10²³ / 3.4×10⁶) ≈ 5.0 × 10³ m/s, about 5 km/s.', null, 'AP|NCERT Class 11 Physics (Gravitation)'],
+                ['i', 3, 'c', 'Case: NavIC (Navigation with Indian Constellation) is India’s regional navigation system. It has seven satellites: three in geostationary orbit and four in inclined geosynchronous orbits.\n(a) What is the orbital period of a geosynchronous satellite? [1]\n(b) Why does an inclined geosynchronous satellite trace a figure-8 path over Earth? [1]\n(c) Give one reason why India built its own system. [2]', '(a) About 24 hours (23 h 56 min). (b) Its orbit is tilted to the equator, so it moves north and south of it while staying in step with Earth’s rotation. (c) A reliable, independent service for civil and strategic use that does not depend on another country’s system.', null, 'AP|ISRO NavIC · NCERT Class 11 Physics (Gravitation)'],
+                ['r', 3, 'l', 'Compare geostationary and polar sun-synchronous orbits: give typical heights, one Indian satellite series for each, and one use of each.', 'Geostationary: about 36,000 km above the equator, period 24 h, stays over one point; INSAT/GSAT series, used for communication and weather. Polar sun-synchronous: roughly 500–900 km, passes over the poles and crosses each place at the same local time; IRS/Cartosat series, used for mapping and remote sensing.', null, 'AN|ISRO INSAT/GSAT and IRS · NCERT Class 11 Physics'],
                 ['i', 1, 'm', 'Who is known as the father of the Indian space programme?', 'Vikram Sarabhai', ['APJ Abdul Kalam', 'Homi Bhabha', 'CV Raman']],
                 ['i', 1, 'm', 'India\u2019s first satellite, launched in 1975, was named', 'Aryabhata', ['Bhaskara', 'INSAT-1A', 'Rohini']],
                 ['i', 1, 'm', 'ISRO was formed in the year', '1969', ['1947', '1975', '1984']],
@@ -4450,52 +4476,51 @@
             function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
 
             function pick() {
-                var band = +$('thBand').value, topic = $('thTopic').value, n = +$('thCount').value;
-                var pool = shuffle(Q.filter(function (q) { return q[1] <= band && (topic === 'all' || q[0] === topic); }));
-                pool.sort(function (a, b) { return (a[1] === band ? 0 : 1) - (b[1] === band ? 0 : 1); });
-                var want = { m: Math.round(n * .5), f: Math.round(n * .15), s: Math.round(n * .25) };
-                want.l = Math.max(n >= 12 ? 1 : 0, n - want.m - want.f - want.s);
+                var band = +$('thBand').value, topic = $('thTopic').value, n = +$('thCount').value, nep = ($('thStyle') || {}).value === 'nep';
+                var pool = shuffle(Q.filter(function (q) { return q[1] <= band && (topic === 'all' || q[0] === topic) && (nep || (q[2] !== 'a' && q[2] !== 'c')); }));
+                pool.sort(function (a, b) { return (a[1] === band ? 0 : 1) - (b[1] === band ? 0 : 1) || (nep ? (b[6] ? 1 : 0) - (a[6] ? 1 : 0) : 0); });
+                var want = nep ? { m: Math.round(n * .3), a: Math.round(n * .15), f: Math.round(n * .05), s: Math.round(n * .2), c: n >= 20 ? 2 : n >= 12 ? 1 : 0 } : { m: Math.round(n * .5), a: 0, f: Math.round(n * .15), s: Math.round(n * .25), c: 0 };
+                want.l = Math.max(n >= 12 ? 1 : 0, n - want.m - want.a - want.f - want.s - want.c);
                 var out = [], used = {};
-                ['m', 'f', 's', 'l'].forEach(function (t) {
+                ['m', 'a', 'f', 's', 'c', 'l'].forEach(function (t) {
                     pool.filter(function (q) { return q[2] === t; }).slice(0, want[t]).forEach(function (q) { out.push(q); used[pool.indexOf(q)] = 1; });
                 });
                 pool.forEach(function (q, i) { if (out.length < n && !used[i]) { out.push(q); used[i] = 1; } });
-                var order = { m: 0, f: 1, s: 2, l: 3 };
-                out.sort(function (a, b) { return order[a[2]] - order[b[2]]; });
-                return out.map(function (q) {
-                    var o = { t: q[2], q: q[3], a: q[4], m: MARKS[q[2]] };
-                    if (q[2] === 'm') { o.o = shuffle([q[4]].concat(q[5])); o.i = o.o.indexOf(q[4]); }
-                    return o;
-                });
+                out.sort(function (a, b) { return ORD[a[2]] - ORD[b[2]]; });
+                return out.map(mkQ);
             }
 
             function ctl(i) { return '<span class="th-ctl"><button title="Swap for another question" onclick="thSwap(' + i + ')">Swap</button><button title="Remove this question" onclick="thDel(' + i + ')">Remove</button></span>'; }
+            function qh(s) { return esc(s).replace(/\n/g, '<br>'); }
             function paperHtml(c, qs, key, ui) {
-                var test = c.kind === 'test', total = qs.reduce(function (s, q) { return s + q.m; }, 0);
+                var test = c.kind === 'test', nep = c.style === 'nep', total = qs.reduce(function (s, q) { return s + q.m; }, 0);
                 var h = '<div style="border-top:5px solid #FF9933;border-bottom:5px solid #138808;padding:8px 0;text-align:center">' +
                     '<div style="font-size:11pt;color:#555">' + esc(c.school || 'School name') + '</div>' +
                     '<div style="font-size:17pt;font-weight:bold">' + (test ? 'Space Science Test Paper' : 'Space Science Worksheet') + (key ? ' - Answer Key' : '') + '</div>' +
-                    '<div style="font-size:11pt">' + esc(c.topic) + ' | Class ' + c.band + '</div></div>';
+                    '<div style="font-size:11pt">' + esc(c.topic) + ' | Class ' + c.band + (nep ? ' | Competency-based (NEP 2020 / NCERT)' : '') + '</div></div>';
                 h += '<table style="width:100%;margin:10px 0;font-size:11pt"><tr><td>Name: ____________________</td><td style="text-align:right">' +
                     (test ? 'Time: ' + Math.max(30, Math.round(total * 1.5 / 5) * 5) + ' minutes &nbsp; Maximum marks: ' + total : 'Date: ______________') + '</td></tr></table>';
-                if (test) h += '<p style="font-size:10.5pt;margin:0 0 8px"><i>All questions are compulsory. Marks are shown in brackets.</i></p>';
-                var n = 0, last = '';
+                if (test) h += '<p style="font-size:10.5pt;margin:0 0 8px"><i>All questions are compulsory. Marks are shown in brackets.' + (nep ? ' Many questions test application and reasoning, not just recall.' : '') + '</i></p>';
+                var n = 0, last = '', ln = 0, bp = {};
                 qs.forEach(function (q, qi) {
-                    if (q.t !== last) {
-                        last = q.t; var s = SECT[q.t];
-                        h += '<h4 style="margin:14px 0 4px;font-size:12pt;border-bottom:1px solid #999">Section ' + s[0] + ': ' + s[1] + '</h4><p style="margin:0 0 6px;font-size:10.5pt"><i>' + s[2] + '</i></p>';
+                    var g = GR[q.t];
+                    if (g !== last) {
+                        last = g; var s = SECT[g];
+                        h += '<h4 style="margin:14px 0 4px;font-size:12pt;border-bottom:1px solid #999">Section ' + 'ABCDE'[ln++] + ': ' + s[1] + '</h4><p style="margin:0 0 6px;font-size:10.5pt"><i>' + s[2] + '</i></p>';
                     }
                     n++;
-                    h += '<p style="margin:8px 0 2px"><b>' + n + '.</b> ' + esc(q.q) + (test ? ' <span style="float:right">[' + q.m + ']</span>' : '') + (ui ? ctl(qi) : '') + '</p>';
-                    if (q.t === 'm') {
-                        h += '<p style="margin:2px 0 2px 18px">' + q.o.map(function (o, i) { return '(' + 'abcd'[i] + ') ' + esc(o); }).join('&nbsp;&nbsp;&nbsp; ') + '</p>';
+                    h += '<p style="margin:8px 0 2px"><b>' + n + '.</b> ' + qh(q.q) + (test ? ' <span style="float:right">[' + q.m + ']</span>' : '') + (ui ? ctl(qi) : '') + '</p>';
+                    if (q.t === 'm' || q.t === 'a') {
+                        h += q.t === 'a' ? q.o.map(function (o, i) { return '<p style="margin:1px 0 1px 18px">(' + 'abcd'[i] + ') ' + esc(o) + '</p>'; }).join('') : '<p style="margin:2px 0 2px 18px">' + q.o.map(function (o, i) { return '(' + 'abcd'[i] + ') ' + esc(o); }).join('&nbsp;&nbsp;&nbsp; ') + '</p>';
                         if (key) h += '<p style="margin:2px 0 2px 18px;color:#0a6b2c"><b>Answer: (' + 'abcd'[q.i] + ') ' + esc(q.a) + '</b></p>';
                     } else if (key) {
-                        h += '<p style="margin:2px 0 2px 18px;color:#0a6b2c"><b>Answer:</b> ' + esc(q.a) + '</p>';
+                        h += '<p style="margin:2px 0 2px 18px;color:#0a6b2c"><b>Answer:</b> ' + qh(q.a) + '</p>';
                     } else if (q.t !== 'f') {
-                        for (var k = 0; k < (q.t === 'l' ? 5 : 2); k++) h += '<div style="border-bottom:1px solid #bbb;height:20px;margin-left:18px"></div>';
+                        for (var k = 0; k < (q.t === 'l' ? 5 : q.t === 'c' ? 4 : 2); k++) h += '<div style="border-bottom:1px solid #bbb;height:20px;margin-left:18px"></div>';
                     }
+                    if (q.c) { bp[q.c] = (bp[q.c] || 0) + q.m; if (key || ui) h += '<p style="margin:0 0 2px 18px;font-size:9pt;color:#666">[' + esc(q.c) + ' · ' + esc(q.src) + ']</p>'; }
                 });
+                if (key && Object.keys(bp).length) h += '<p style="margin-top:12px;font-size:10pt"><b>Competency blueprint (marks):</b> ' + Object.keys(bp).map(function (k) { return k + ' ' + bp[k]; }).join(' | ') + '</p>';
                 h += '<p style="margin-top:16px;font-size:9.5pt;color:#666;text-align:center">' + (c.teacher ? 'Prepared by ' + esc(c.teacher) + ' | ' : '') + 'Made with COSMOSIS Teacher Hub</p>';
                 return h;
             }
@@ -4504,7 +4529,7 @@
 
             window.thBuild = function (toast) {
                 var qs = pick();
-                st.cfg = { kind: $('thKind').value, band: BANDS[$('thBand').value], topic: TOPICS[$('thTopic').value], school: $('thSchool').value.trim(), teacher: $('thTeacher').value.trim() };
+                st.cfg = { kind: $('thKind').value, style: ($('thStyle') || {}).value, band: BANDS[$('thBand').value], topic: TOPICS[$('thTopic').value], school: $('thSchool').value.trim(), teacher: $('thTeacher').value.trim() };
                 st.qs = qs;
                 thRender();
                 if (toast) showToast(qs.length + ' questions ready. Download or print below.', 'success');
@@ -4568,7 +4593,7 @@
             }
 
             /* ===== v2: edit paper, word search, live quiz ===== */
-            function mkQ(q) { var o = { t: q[2], q: q[3], a: q[4], m: MARKS[q[2]] }; if (q[2] === 'm') { o.o = shuffle([q[4]].concat(q[5])); o.i = o.o.indexOf(q[4]); } return o; }
+            function mkQ(q) { var o = { t: q[2], q: q[3], a: q[4], m: MARKS[q[2]] }; if (q[6]) { var p = q[6].split('|'); o.c = CL[p[0]]; o.src = p[1]; } if (q[2] === 'm') { o.o = shuffle([q[4]].concat(q[5])); o.i = o.o.indexOf(q[4]); } else if (q[2] === 'a') { o.o = AR.slice(); o.i = AR.indexOf(q[4]); } return o; }
             window.thSwap = function (i) {
                 var q = st.qs[i], band = +$('thBand').value, topic = $('thTopic').value, have = st.qs.map(function (x) { return x.q; });
                 var ok = function (r, tp) { return r[2] === q.t && r[1] <= band && have.indexOf(r[3]) < 0 && (!tp || topic === 'all' || r[0] === topic); };
@@ -4583,7 +4608,7 @@
                 if (!q) { showToast('Type your question first.', 'error'); return; }
                 if (!st.cfg) thBuild(false);
                 st.qs.push({ t: t, q: q, a: a || '(add your answer)', m: MARKS[t] });
-                var order = { m: 0, f: 1, s: 2, l: 3 };
+                var order = ORD;
                 st.qs.forEach(function (x, i) { x._i = i; });
                 st.qs.sort(function (a, b) { return order[a.t] - order[b.t] || a._i - b._i; });
                 $('thOwnQ').value = ''; $('thOwnA').value = ''; thRender();
