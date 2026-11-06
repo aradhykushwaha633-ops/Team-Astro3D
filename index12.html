@@ -1,158 +1,442 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Customise Your Own Earth · COSMOSIS Skill Lab</title>
-<style>
-:root{--c:#5fd8ff;--t:#e3edf8;--m:#9fb3c8;--b:rgba(120,200,255,.22);--g:rgba(8,16,28,.66)}
-*{box-sizing:border-box}
-html,body{margin:0;height:100%;background:#000;color:var(--t);font:13px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;overflow:hidden}
-#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
-.glass{background:var(--g);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--b);border-radius:14px}
-.back{position:fixed;z-index:20;top:calc(env(safe-area-inset-top,0px) + 12px);left:14px;height:36px;padding:0 15px;display:inline-flex;align-items:center;border-radius:999px;color:var(--t);text-decoration:none;font-weight:600;background:rgba(8,16,28,.65);border:1px solid var(--b)}
-.back:hover{background:rgba(95,216,255,.2)}
-#gauge{position:fixed;z-index:5;left:16px;top:calc(60px + env(safe-area-inset-top,0px));padding:10px 14px;width:190px}
-#sc{font-size:38px;font-weight:700;line-height:1;color:var(--c)}#sc small{font-size:13px;color:var(--m);font-weight:400}
-#vd{font-size:12px;margin:3px 0 6px}
-#bar{height:6px;border-radius:9px;background:rgba(255,255,255,.12);overflow:hidden}#bar i{display:block;height:100%;width:0;background:#5fd8ff;transition:width .35s,background .35s}
-#tp{margin-top:6px;color:var(--m);font-size:11.5px}
-#ui{position:fixed;z-index:6;right:14px;top:14px;bottom:14px;width:min(390px,calc(100vw - 28px));overflow:auto;padding:14px}
-h2{margin:0 0 2px;font-size:16px;letter-spacing:.1em;color:var(--c)}
-h3{margin:14px 0 6px;font-size:11px;letter-spacing:.14em;color:var(--m);text-transform:uppercase}
-p{margin:6px 0}
-button{font:inherit;color:var(--t);background:rgba(255,255,255,.07);border:1px solid var(--b);border-radius:9px;padding:6px 10px;cursor:pointer;min-height:32px}
-button:hover{background:rgba(95,216,255,.18)}button.on{background:rgba(95,216,255,.28);border-color:var(--c)}
-.row{display:flex;flex-wrap:wrap;gap:6px}
-.sl{margin:9px 0}.sl .t{display:flex;justify-content:space-between;gap:8px}.sl b{font-weight:600}.sl span{color:var(--c);font-variant-numeric:tabular-nums}
-.sl input{width:100%;accent-color:#5fd8ff;margin:4px 0 0}.sl input:disabled{opacity:.45}.sl small{display:block;color:var(--m);font-size:11px;line-height:1.3}
-#fc{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.ch{padding:6px 9px;border-radius:10px;border:1px solid;font-size:12px}.ch b{display:block;font-weight:600}
-.ch.g{border-color:rgba(125,255,176,.5);background:rgba(125,255,176,.1)}.ch.w{border-color:rgba(255,205,110,.5);background:rgba(255,205,110,.1)}.ch.r{border-color:rgba(255,130,130,.55);background:rgba(255,130,130,.12)}
-#ms{padding:9px 11px;border-radius:10px;background:rgba(255,255,255,.07);margin-top:8px}
-#toast{position:fixed;z-index:30;left:50%;top:70px;transform:translateX(-50%);padding:10px 16px;border-radius:999px;background:rgba(8,16,28,.9);border:1px solid var(--c);opacity:0;pointer-events:none;transition:opacity .3s}
-#toast.on{opacity:1}
-@media(max-width:760px){#ui{top:auto;left:8px;right:8px;bottom:8px;width:auto;max-height:50vh}#gauge{width:168px;padding:8px 11px}#sc{font-size:30px}}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
-</style>
-<script src="script2.js"></script>
-<script src="script1.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>Customise Your Own Earth · COSMOSIS Skill Lab</title>
+    <style>
+        :root {
+            --c: #5fd8ff;
+            --t: #e3edf8;
+            --m: #9fb3c8;
+            --b: rgba(120, 200, 255, .22);
+            --g: rgba(8, 16, 28, .66)
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            background: #000;
+            color: var(--t);
+            font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+            overflow: hidden
+        }
+
+        #c {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            touch-action: none
+        }
+
+        .glass {
+            background: var(--g);
+            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--b);
+            border-radius: 14px
+        }
+
+        .back {
+            position: fixed;
+            z-index: 20;
+            top: calc(env(safe-area-inset-top, 0px) + 12px);
+            left: 14px;
+            height: 36px;
+            padding: 0 15px;
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            color: var(--t);
+            text-decoration: none;
+            font-weight: 600;
+            background: rgba(8, 16, 28, .65);
+            border: 1px solid var(--b)
+        }
+
+        .back:hover {
+            background: rgba(95, 216, 255, .2)
+        }
+
+        #gauge {
+            position: fixed;
+            z-index: 5;
+            left: 16px;
+            top: calc(60px + env(safe-area-inset-top, 0px));
+            padding: 10px 14px;
+            width: 190px
+        }
+
+        #sc {
+            font-size: 38px;
+            font-weight: 700;
+            line-height: 1;
+            color: var(--c)
+        }
+
+        #sc small {
+            font-size: 13px;
+            color: var(--m);
+            font-weight: 400
+        }
+
+        #vd {
+            font-size: 12px;
+            margin: 3px 0 6px
+        }
+
+        #bar {
+            height: 6px;
+            border-radius: 9px;
+            background: rgba(255, 255, 255, .12);
+            overflow: hidden
+        }
+
+        #bar i {
+            display: block;
+            height: 100%;
+            width: 0;
+            background: #5fd8ff;
+            transition: width .35s, background .35s
+        }
+
+        #tp {
+            margin-top: 6px;
+            color: var(--m);
+            font-size: 11.5px
+        }
+
+        #ui {
+            position: fixed;
+            z-index: 6;
+            right: 14px;
+            top: 14px;
+            bottom: 14px;
+            width: min(390px, calc(100vw - 28px));
+            overflow: auto;
+            padding: 14px
+        }
+
+        h2 {
+            margin: 0 0 2px;
+            font-size: 16px;
+            letter-spacing: .1em;
+            color: var(--c)
+        }
+
+        h3 {
+            margin: 14px 0 6px;
+            font-size: 11px;
+            letter-spacing: .14em;
+            color: var(--m);
+            text-transform: uppercase
+        }
+
+        p {
+            margin: 6px 0
+        }
+
+        button {
+            font: inherit;
+            color: var(--t);
+            background: rgba(255, 255, 255, .07);
+            border: 1px solid var(--b);
+            border-radius: 9px;
+            padding: 6px 10px;
+            cursor: pointer;
+            min-height: 32px
+        }
+
+        button:hover {
+            background: rgba(95, 216, 255, .18)
+        }
+
+        button.on {
+            background: rgba(95, 216, 255, .28);
+            border-color: var(--c)
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px
+        }
+
+        .sl {
+            margin: 9px 0
+        }
+
+        .sl .t {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px
+        }
+
+        .sl b {
+            font-weight: 600
+        }
+
+        .sl span {
+            color: var(--c);
+            font-variant-numeric: tabular-nums
+        }
+
+        .sl input {
+            width: 100%;
+            accent-color: #5fd8ff;
+            margin: 4px 0 0
+        }
+
+        .sl input:disabled {
+            opacity: .45
+        }
+
+        .sl small {
+            display: block;
+            color: var(--m);
+            font-size: 11px;
+            line-height: 1.3
+        }
+
+        #fc {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px
+        }
+
+        .ch {
+            padding: 6px 9px;
+            border-radius: 10px;
+            border: 1px solid;
+            font-size: 12px
+        }
+
+        .ch b {
+            display: block;
+            font-weight: 600
+        }
+
+        .ch.g {
+            border-color: rgba(125, 255, 176, .5);
+            background: rgba(125, 255, 176, .1)
+        }
+
+        .ch.w {
+            border-color: rgba(255, 205, 110, .5);
+            background: rgba(255, 205, 110, .1)
+        }
+
+        .ch.r {
+            border-color: rgba(255, 130, 130, .55);
+            background: rgba(255, 130, 130, .12)
+        }
+
+        #ms {
+            padding: 9px 11px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, .07);
+            margin-top: 8px
+        }
+
+        #toast {
+            position: fixed;
+            z-index: 30;
+            left: 50%;
+            top: 70px;
+            transform: translateX(-50%);
+            padding: 10px 16px;
+            border-radius: 999px;
+            background: rgba(8, 16, 28, .9);
+            border: 1px solid var(--c);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s
+        }
+
+        #toast.on {
+            opacity: 1
+        }
+
+        @media(max-width:760px) {
+            #ui {
+                top: auto;
+                left: 8px;
+                right: 8px;
+                bottom: 8px;
+                width: auto;
+                max-height: 50vh
+            }
+
+            #gauge {
+                width: 168px;
+                padding: 8px 11px
+            }
+
+            #sc {
+                font-size: 30px
+            }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+            * {
+                transition: none !important
+            }
+        }
+    </style>
+    <script src="script2.js"></script>
+    <script src="script1.js"></script>
 </head>
+
 <body>
-<canvas id="c" aria-label="Your customised Earth"></canvas>
-<a class="back" href="index.html">← Back</a>
-<div id="gauge" class="glass"><div id="sc">0<small> / 100</small></div><div id="vd"></div><div id="bar"><i></i></div><div id="tp"></div></div>
-<div id="ui" class="glass"></div>
-<div id="toast"></div>
+    <canvas id="c" aria-label="Your customised Earth"></canvas>
+    <a class="back" href="index.html">← Back</a>
+    <div id="gauge" class="glass">
+        <div id="sc">0<small> / 100</small></div>
+        <div id="vd"></div>
+        <div id="bar"><i></i></div>
+        <div id="tp"></div>
+    </div>
+    <div id="ui" class="glass"></div>
+    <div id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="script6.js"></script>
-<script>
-(function () {
-  var E = window.CosmosEarth, $ = function (s) { return document.querySelector(s); }, ui = $('#ui');
-  if (!E || !window.THREE || !THREE.OrbitControls) { ui.innerHTML = '<h2>Could not load 3D</h2><p>Three.js loads from a CDN. Check your internet connection and reload.</p>'; return; }
-  var env = E.init($('#c'), { shift: 195, shiftY: .24, dist: 3.6 }), earth = E.planet('earth'); env.add(earth); earth.g.scale.setScalar(1.25); env.dist(4);
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="script6.js"></script>
+    <script>
+        (function () {
+            var E = window.CosmosEarth, $ = function (s) { return document.querySelector(s); }, ui = $('#ui');
+            if (!E || !window.THREE || !THREE.OrbitControls) { ui.innerHTML = '<h2>Could not load 3D</h2><p>Three.js loads from a CDN. Check your internet connection and reload.</p>'; return; }
+            var env = E.init($('#c'), { shift: 195, shiftY: .24, dist: 3.6 }), earth = E.planet('earth'); env.add(earth); earth.g.scale.setScalar(1.25); env.dist(4);
 
-  /* ----- the sliders: key, label, min, max, step, formatter, why it matters ----- */
-  var ppmOf = function (v) { return Math.pow(10, 2 + v * .04); }, atmOf = function (v) { return Math.pow(10, -2 + v * .04); };
-  var SL = [
-    ['o2', 'Oxygen', 0, 40, .5, function (v) { return v.toFixed(1) + ' %'; }, 'Made by plants and algae. Too little and animals cannot breathe; too much and fires spread easily.'],
-    ['co2', 'Carbon dioxide', 0, 100, .5, function (v) { var p = ppmOf(v); return p >= 1e4 ? (p / 1e4).toFixed(p >= 1e5 ? 0 : 1) + ' %' : Math.round(p) + ' ppm'; }, 'A greenhouse gas. More CO₂ traps more heat, but plants need some.'],
-    ['w', 'Water coverage', 0, 100, 1, function (v) { return v + ' %'; }, 'Oceans store heat and feed rain. Earth has 71%.'],
-    ['d', 'Distance from Sun', .4, 2, .01, function (v) { return v.toFixed(2) + ' AU'; }, '1 AU is Earth’s distance. Closer is hotter, farther is colder.'],
-    ['p', 'Air pressure', 0, 100, .5, function (v) { var p = atmOf(v); return (p < 1 ? p.toFixed(2) : p < 10 ? p.toFixed(1) : Math.round(p)) + ' atm'; }, 'Thin air cannot hold water or oxygen. Thick air traps heat.'],
-    ['g', 'Gravity', .1, 4, .05, function (v) { return v.toFixed(2) + ' g'; }, 'Decides how well a planet keeps its air for billions of years.'],
-    ['m', 'Magnetic field', 0, 100, 1, function (v) { return v + ' %'; }, 'A shield against the solar wind. Without it the air is slowly stripped away.']
-  ];
-  var PR = {
-    earth: { o2: 21, co2: 15.6, w: 71, d: 1, p: 50, g: 1, m: 100 },
-    mars: { o2: 0, co2: 99, w: 0, d: 1.52, p: 0, g: .38, m: 0, lock: ['d', 'g'], name: 'Terraform Mars', xp: 40, hint: 'Mars is far away and its gravity is weak. Warm it with more air and some CO₂, add oxygen, water and a magnetic shield. Remember: gravity can never be fixed, so Mars tops out near 70.' },
-    venus: { o2: 0, co2: 99.5, w: 0, d: .72, p: 99, g: .9, m: 5, lock: ['d', 'g'], name: 'Rescue Venus', xp: 40, hint: 'Venus is far too hot. Remove most of the CO₂ and the crushing air, then add oxygen, water and a magnetic field.' },
-    snow: { o2: 21, co2: 0, w: 71, d: 1.15, p: 50, g: 1, m: 100, lock: ['d', 'g'], name: 'Thaw Snowball Earth', xp: 30, hint: 'This Earth is frozen. Which greenhouse gas could warm it back up?' }
-  };
-  var PL = { earth: 'Earth', mars: 'Mars-like', venus: 'Venus-like', snow: 'Snowball' };
-  var S = {}, chal = null, lock = [], GOAL = 65;
-  function setS(o) { for (var k in PR.earth) S[k] = o[k]; }
-  function tri(x, a, b, c, d) { return x <= a || x >= d ? 0 : x < b ? (x - a) / (b - a) : x <= c ? 1 : (d - x) / (d - c); }
+            /* ----- the sliders: key, label, min, max, step, formatter, why it matters ----- */
+            var ppmOf = function (v) { return Math.pow(10, 2 + v * .04); }, atmOf = function (v) { return Math.pow(10, -2 + v * .04); };
+            var SL = [
+                ['o2', 'Oxygen', 0, 40, .5, function (v) { return v.toFixed(1) + ' %'; }, 'Made by plants and algae. Too little and animals cannot breathe; too much and fires spread easily.'],
+                ['co2', 'Carbon dioxide', 0, 100, .5, function (v) { var p = ppmOf(v); return p >= 1e4 ? (p / 1e4).toFixed(p >= 1e5 ? 0 : 1) + ' %' : Math.round(p) + ' ppm'; }, 'A greenhouse gas. More CO₂ traps more heat, but plants need some.'],
+                ['w', 'Water coverage', 0, 100, 1, function (v) { return v + ' %'; }, 'Oceans store heat and feed rain. Earth has 71%.'],
+                ['d', 'Distance from Sun', .4, 2, .01, function (v) { return v.toFixed(2) + ' AU'; }, '1 AU is Earth’s distance. Closer is hotter, farther is colder.'],
+                ['p', 'Air pressure', 0, 100, .5, function (v) { var p = atmOf(v); return (p < 1 ? p.toFixed(2) : p < 10 ? p.toFixed(1) : Math.round(p)) + ' atm'; }, 'Thin air cannot hold water or oxygen. Thick air traps heat.'],
+                ['g', 'Gravity', .1, 4, .05, function (v) { return v.toFixed(2) + ' g'; }, 'Decides how well a planet keeps its air for billions of years.'],
+                ['m', 'Magnetic field', 0, 100, 1, function (v) { return v + ' %'; }, 'A shield against the solar wind. Without it the air is slowly stripped away.']
+            ];
+            var PR = {
+                earth: { o2: 21, co2: 15.6, w: 71, d: 1, p: 50, g: 1, m: 100 },
+                mars: { o2: 0, co2: 99, w: 0, d: 1.52, p: 0, g: .38, m: 0, lock: ['d', 'g'], name: 'Terraform Mars', xp: 40, hint: 'Mars is far away and its gravity is weak. Warm it with more air and some CO₂, add oxygen, water and a magnetic shield. Remember: gravity can never be fixed, so Mars tops out near 70.' },
+                venus: { o2: 0, co2: 99.5, w: 0, d: .72, p: 99, g: .9, m: 5, lock: ['d', 'g'], name: 'Rescue Venus', xp: 40, hint: 'Venus is far too hot. Remove most of the CO₂ and the crushing air, then add oxygen, water and a magnetic field.' },
+                snow: { o2: 21, co2: 0, w: 71, d: 1.15, p: 50, g: 1, m: 100, lock: ['d', 'g'], name: 'Thaw Snowball Earth', xp: 30, hint: 'This Earth is frozen. Which greenhouse gas could warm it back up?' }
+            };
+            var PL = { earth: 'Earth', mars: 'Mars-like', venus: 'Venus-like', snow: 'Snowball' };
+            var S = {}, chal = null, lock = [], GOAL = 65;
+            function setS(o) { for (var k in PR.earth) S[k] = o[k]; }
+            function tri(x, a, b, c, d) { return x <= a || x >= d ? 0 : x < b ? (x - a) / (b - a) : x <= c ? 1 : (d - x) / (d - c); }
 
-  /* ----- the science model: simple, honest and explainable ----- */
-  function calc() {
-    var P = atmOf(S.p), ppm = ppmOf(S.co2), raw = 33 * Math.sqrt(P) * (1 + .35 * Math.log(ppm / 420) / Math.LN2);
-    var T = 255 / Math.sqrt(S.d) + 520 * (1 - Math.exp(-raw / 520));       // Sun's heat + greenhouse effect (kelvin)
-    var pO = S.o2 / 100 * P, f = {
-      T: tri(T, 243, 273, 308, 343), O: tri(pO, .10, .16, .35, .6),
-      C: Math.min(ppm <= 1000 ? 1 : ppm >= 40000 ? 0 : (40000 - ppm) / 39000, ppm < 150 ? ppm / 150 : 1),
-      W: tri(S.w, 0, 35, 80, 115), P: tri(P, .06, .5, 1.8, 4), G: tri(S.g, .15, .6, 1.4, 2.5), M: .15 + .85 * Math.min(1, S.m / 50)
-    };
-    var mn = 1, ln = 0, n = 0, k; for (k in f) { mn = Math.min(mn, f[k]); ln += Math.log(Math.max(f[k], 1e-4)); n++; }
-    return { T: T, P: P, ppm: ppm, pO: pO, f: f, score: Math.round(100 * (.5 * mn + .5 * Math.exp(ln / n))) };
-  }
-  function hint(r) {
-    var m = 2, k, f = r.f; for (var x in f) if (f[x] < m) { m = f[x]; k = x; }
-    if (m >= .9) return '✅ Balanced! Life can thrive on this world.';
-    var H = {
-      T: r.T < 288 ? 'It is too cold. Move closer to the Sun or add CO₂ and air pressure (the greenhouse effect).' : 'It is too hot. Move farther from the Sun, or reduce CO₂ and air pressure.',
-      O: r.pO < .2 ? 'Not enough oxygen to breathe. Raise oxygen or air pressure.' : 'Too much oxygen: fires spread easily and it becomes toxic.',
-      C: r.ppm > 1000 ? 'CO₂ is too high. It is toxic above 4% and it overheats the planet.' : 'CO₂ is too low. Plants starve and the planet cools.',
-      W: S.w < 50 ? 'There is too little water for oceans and rain.' : 'It is an ocean world with almost no land to live on.',
-      P: r.P < 1 ? 'The air is too thin. Water boils away and you cannot breathe.' : 'The pressure is crushing, too thick for life like ours.',
-      G: S.g < 1 ? 'Gravity is too weak to keep an atmosphere for billions of years.' : 'Gravity is too strong. Bones and hearts struggle.',
-      M: 'There is no magnetic shield. The solar wind strips the air and radiation reaches the ground.'
-    };
-    return '⚠️ Biggest problem: ' + H[k];
-  }
-  function verdict(s) { return s >= 85 ? '🌳 Thriving biosphere' : s >= GOAL ? '🙂 Habitable' : s >= 40 ? '🦠 Harsh: only microbes' : s >= 15 ? '☠️ Hostile' : '💀 Dead world'; }
+            /* ----- the science model: simple, honest and explainable ----- */
+            function calc() {
+                var P = atmOf(S.p), ppm = ppmOf(S.co2), raw = 33 * Math.sqrt(P) * (1 + .35 * Math.log(ppm / 420) / Math.LN2);
+                var T = 255 / Math.sqrt(S.d) + 520 * (1 - Math.exp(-raw / 520));       // Sun's heat + greenhouse effect (kelvin)
+                var pO = S.o2 / 100 * P, f = {
+                    T: tri(T, 243, 273, 308, 343), O: tri(pO, .10, .16, .35, .6),
+                    C: Math.min(ppm <= 1000 ? 1 : ppm >= 40000 ? 0 : (40000 - ppm) / 39000, ppm < 150 ? ppm / 150 : 1),
+                    W: tri(S.w, 0, 35, 80, 115), P: tri(P, .06, .5, 1.8, 4), G: tri(S.g, .15, .6, 1.4, 2.5), M: .15 + .85 * Math.min(1, S.m / 50)
+                };
+                var mn = 1, ln = 0, n = 0, k; for (k in f) { mn = Math.min(mn, f[k]); ln += Math.log(Math.max(f[k], 1e-4)); n++; }
+                return { T: T, P: P, ppm: ppm, pO: pO, f: f, score: Math.round(100 * (.5 * mn + .5 * Math.exp(ln / n))) };
+            }
+            function hint(r) {
+                var m = 2, k, f = r.f; for (var x in f) if (f[x] < m) { m = f[x]; k = x; }
+                if (m >= .9) return '✅ Balanced! Life can thrive on this world.';
+                var H = {
+                    T: r.T < 288 ? 'It is too cold. Move closer to the Sun or add CO₂ and air pressure (the greenhouse effect).' : 'It is too hot. Move farther from the Sun, or reduce CO₂ and air pressure.',
+                    O: r.pO < .2 ? 'Not enough oxygen to breathe. Raise oxygen or air pressure.' : 'Too much oxygen: fires spread easily and it becomes toxic.',
+                    C: r.ppm > 1000 ? 'CO₂ is too high. It is toxic above 4% and it overheats the planet.' : 'CO₂ is too low. Plants starve and the planet cools.',
+                    W: S.w < 50 ? 'There is too little water for oceans and rain.' : 'It is an ocean world with almost no land to live on.',
+                    P: r.P < 1 ? 'The air is too thin. Water boils away and you cannot breathe.' : 'The pressure is crushing, too thick for life like ours.',
+                    G: S.g < 1 ? 'Gravity is too weak to keep an atmosphere for billions of years.' : 'Gravity is too strong. Bones and hearts struggle.',
+                    M: 'There is no magnetic shield. The solar wind strips the air and radiation reaches the ground.'
+                };
+                return '⚠️ Biggest problem: ' + H[k];
+            }
+            function verdict(s) { return s >= 85 ? '🌳 Thriving biosphere' : s >= GOAL ? '🙂 Habitable' : s >= 40 ? '🦠 Harsh: only microbes' : s >= 15 ? '☠️ Hostile' : '💀 Dead world'; }
 
-  /* ----- make the 3D Earth match the numbers ----- */
-  function look(r) {
-    var T = r.T, hot = Math.max(0, Math.min(1, (T - 325) / 60)), cl = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
-    var px = cl(Math.log(r.ppm / 420) / Math.LN10 / 3.4, 0, 1);
-    earth.set({
-      sea: .40 + .002 * S.w, ocean: S.w > 2 ? 1 : 0,
-      veg: Math.min(1, S.o2 / 21) * tri(T, 245, 280, 305, 335) * Math.min(1, S.w / 30) * r.f.C,
-      ice: cl(.08 + (288 - T) / 45 * .9, 0, 1), warm: cl((T - 288) / 55, -.4, .9),
-      cover: cl(S.w / 100 * .55 + .05 + (T - 288) / 200 + hot, 0, 1), ccol: [1 - .07 * hot, 1 - .21 * hot, 1 - .54 * hot],
-      atm: [.3 + .7 * px, .55 + .05 * px, 1 - .75 * px], atmK: cl(Math.pow(r.P, .35) * .9, .03, 1.5),
-      city: r.score > 35 ? (r.score - 35) / 65 : 0, L2: [.62 - .3 * hot, .5 - .3 * hot, .32 - .2 * hot]
-    });
-  }
+            /* ----- make the 3D Earth match the numbers ----- */
+            function look(r) {
+                var T = r.T, hot = Math.max(0, Math.min(1, (T - 325) / 60)), cl = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
+                var px = cl(Math.log(r.ppm / 420) / Math.LN10 / 3.4, 0, 1);
+                earth.set({
+                    sea: .40 + .002 * S.w, ocean: S.w > 2 ? 1 : 0,
+                    veg: Math.min(1, S.o2 / 21) * tri(T, 245, 280, 305, 335) * Math.min(1, S.w / 30) * r.f.C,
+                    ice: cl(.08 + (288 - T) / 45 * .9, 0, 1), warm: cl((T - 288) / 55, -.4, .9),
+                    cover: cl(S.w / 100 * .55 + .05 + (T - 288) / 200 + hot, 0, 1), ccol: [1 - .07 * hot, 1 - .21 * hot, 1 - .54 * hot],
+                    atm: [.3 + .7 * px, .55 + .05 * px, 1 - .75 * px], atmK: cl(Math.pow(r.P, .35) * .9, .03, 1.5),
+                    city: (r.score > 35 ? (r.score - 35) / 65 : 0) * Math.min(1, .2 + capOf(r) / 8.3e9), L2: [.62 - .3 * hot, .5 - .3 * hot, .32 - .2 * hot]
+                });
+            }
 
-  /* ----- UI ----- */
-  function fmt(i) { return SL[i][5](S[SL[i][0]]); }
-  function build() {
-    var h = '<h2>CUSTOMISE YOUR OWN EARTH</h2><div style="color:var(--m)">Change the planet’s numbers and watch life win or lose.</div>';
-    h += '<h3>Start from</h3><div class="row">' + Object.keys(PL).map(function (k) { return '<button data-p="' + k + '" class="' + (k === (chal || 'earth') ? 'on' : '') + '">' + PL[k] + (E.done('ch_' + k) ? ' ✓' : '') + '</button>'; }).join('') + '</div>';
-    h += '<div id="ms">' + (chal ? '🎯 <b>' + PR[chal].name + '</b>: reach ' + GOAL + '+ habitability (+' + PR[chal].xp + ' XP). 🔒 Distance and gravity are fixed, because planets cannot change those.<br><span style="color:var(--m)">' + PR[chal].hint + '</span>' : 'Free play: change anything. Or pick a challenge above to earn XP.') + '</div>';
-    h += '<h3>Planet settings</h3>' + SL.map(function (s, i) {
-      var l = lock.indexOf(s[0]) >= 0;
-      return '<div class="sl"><div class="t"><b>' + (l ? '🔒 ' : '') + s[1] + '</b><span id="v_' + s[0] + '">' + fmt(i) + '</span></div><input type="range" id="r_' + s[0] + '" data-k="' + s[0] + '" min="' + s[2] + '" max="' + s[3] + '" step="' + s[4] + '" value="' + S[s[0]] + '"' + (l ? ' disabled' : '') + ' aria-label="' + s[1] + '"><small>' + s[6] + '</small></div>';
-    }).join('');
-    h += '<h3>Is it good for life?</h3><div id="fc"></div><div id="ms2" class="ms" style="padding:9px 11px;border-radius:10px;background:rgba(255,255,255,.07);margin-top:8px"></div>';
-    h += '<p style="margin-top:14px"><a href="index11.html" style="color:var(--c)">🌍 Learn why other planets fail in Discover →</a></p>';
-    ui.innerHTML = h;
-  }
-  function refresh(user) {
-    var r = calc(), N = { T: 'Temperature', O: 'Oxygen to breathe', C: 'CO₂ level', W: 'Water', P: 'Air pressure', G: 'Gravity', M: 'Magnetic shield' };
-    var V = { T: Math.round(r.T - 273.15) + ' °C', O: r.pO.toFixed(2) + ' atm O₂', C: fmt(1), W: S.w + ' %', P: fmt(4), G: fmt(5), M: S.m + ' %' };
-    $('#fc').innerHTML = Object.keys(N).map(function (k) { var v = r.f[k]; return '<div class="ch ' + (v >= .8 ? 'g' : v >= .4 ? 'w' : 'r') + '"><b>' + N[k] + '</b>' + V[k] + '</div>'; }).join('');
-    $('#ms2').textContent = hint(r);
-    SL.forEach(function (s, i) { var e = $('#v_' + s[0]); if (e) e.textContent = fmt(i); });
-    $('#sc').innerHTML = r.score + '<small> / 100</small>'; $('#vd').textContent = verdict(r.score);
-    var b = $('#bar i'); b.style.width = r.score + '%'; b.style.background = r.score >= GOAL ? '#7dffb0' : r.score >= 40 ? '#ffd166' : '#ff7b7b';
-    $('#tp').textContent = '🌡 Surface ≈ ' + Math.round(r.T - 273.15) + ' °C';
-    look(r);
-    if (user && chal && r.score >= GOAL && E.award('ch_' + chal, PR[chal].xp, 'Earth Lab: ' + PR[chal].name)) { toast('🏆 ' + PR[chal].name + ' complete!  +' + PR[chal].xp + ' XP'); var bt = ui.querySelector('[data-p="' + chal + '"]'); if (bt) bt.textContent = PL[chal] + ' ✓'; }
-  }
-  var tt = 0;
-  function toast(m) { var t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(function () { t.classList.remove('on'); }, 3200); }
-  function load(k) { var p = PR[k]; chal = k === 'earth' ? null : k; lock = p.lock || []; setS(p); build(); refresh(false); }
+            /* ----- UI ----- */
+            function fmt(i) { return SL[i][5](S[SL[i][0]]); }
+            function build() {
+                var h = '<h2>CUSTOMISE YOUR OWN EARTH</h2><div style="color:var(--m)">Change the planet’s numbers and watch life win or lose.</div>';
+                h += '<h3>Start from</h3><div class="row">' + Object.keys(PL).map(function (k) { return '<button data-p="' + k + '" class="' + (k === (chal || 'earth') ? 'on' : '') + '">' + PL[k] + (E.done('ch_' + k) ? ' ✓' : '') + '</button>'; }).join('') + '</div>';
+                h += '<div id="ms">' + (chal ? '🎯 <b>' + PR[chal].name + '</b>: reach ' + GOAL + '+ habitability (+' + PR[chal].xp + ' XP). 🔒 Distance and gravity are fixed, because planets cannot change those.<br><span style="color:var(--m)">' + PR[chal].hint + '</span>' : 'Free play: change anything. Or pick a challenge above to earn XP.') + '</div>';
+                h += '<h3>Planet settings</h3>' + SL.map(function (s, i) {
+                    var l = lock.indexOf(s[0]) >= 0;
+                    return '<div class="sl"><div class="t"><b>' + (l ? '🔒 ' : '') + s[1] + '</b><span id="v_' + s[0] + '">' + fmt(i) + '</span></div><input type="range" id="r_' + s[0] + '" data-k="' + s[0] + '" min="' + s[2] + '" max="' + s[3] + '" step="' + s[4] + '" value="' + S[s[0]] + '"' + (l ? ' disabled' : '') + ' aria-label="' + s[1] + '"><small>' + s[6] + '</small></div>';
+                }).join('');
+                h += '<h3>Is it good for life?</h3><div id="fc"></div><div id="ms2" class="ms" style="padding:9px 11px;border-radius:10px;background:rgba(255,255,255,.07);margin-top:8px"></div>';
+                h += '<h3>Population</h3><div id="pp"></div>';
+                h += '<p style="margin-top:14px"><a href="index11.html" style="color:var(--c)">🌍 Learn why other planets fail in Discover →</a></p>';
+                ui.innerHTML = h;
+            }
+            function refresh(user) {
+                var r = calc(), N = { T: 'Temperature', O: 'Oxygen to breathe', C: 'CO₂ level', W: 'Water', P: 'Air pressure', G: 'Gravity', M: 'Magnetic shield' };
+                var V = { T: Math.round(r.T - 273.15) + ' °C', O: r.pO.toFixed(2) + ' atm O₂', C: fmt(1), W: S.w + ' %', P: fmt(4), G: fmt(5), M: S.m + ' %' };
+                $('#fc').innerHTML = Object.keys(N).map(function (k) { var v = r.f[k]; return '<div class="ch ' + (v >= .8 ? 'g' : v >= .4 ? 'w' : 'r') + '"><b>' + N[k] + '</b>' + V[k] + '</div>'; }).join('');
+                $('#ms2').textContent = hint(r);
+                SL.forEach(function (s, i) { var e = $('#v_' + s[0]); if (e) e.textContent = fmt(i); });
+                $('#sc').innerHTML = r.score + '<small> / 100</small>'; $('#vd').textContent = verdict(r.score);
+                var b = $('#bar i'); b.style.width = r.score + '%'; b.style.background = r.score >= GOAL ? '#7dffb0' : r.score >= 40 ? '#ffd166' : '#ff7b7b';
+                $('#tp').textContent = '🌡 Surface ≈ ' + Math.round(r.T - 273.15) + ' °C';
+                look(r); popUI(r); if (user && capOf(r) >= 1e10 && r.score >= GOAL && E.award('pop10', 50, 'Earth Lab: 10 billion people')) toast('🏆 Your world can feed 10 billion people!  +50 XP');
+                if (user && chal && r.score >= GOAL && E.award('ch_' + chal, PR[chal].xp, 'Earth Lab: ' + PR[chal].name)) { toast('🏆 ' + PR[chal].name + ' complete!  +' + PR[chal].xp + ' XP'); var bt = ui.querySelector('[data-p="' + chal + '"]'); if (bt) bt.textContent = PL[chal] + ' ✓'; }
+            }
+            /* ----- population: how many people can this world support? (a simple teaching model) ----- */
+            var sim = null, simT = 0, POP = E.POP;
+            function capOf(r) { var land = 510.1e6 * (100 - S.w) / 100, u = Math.max(0, (r.score - 30) / 70); return land * 78 * u * u; }
+            function fb(n) { return n >= 1e9 ? (n / 1e9).toFixed(2) + ' billion' : n >= 1e6 ? (n / 1e6).toFixed(1) + ' million' : n >= 1e3 ? Math.round(n / 1e3) + ' thousand' : Math.round(n) + ''; }
+            function popUI(r) {
+                var cap = capOf(r), now = POP.now(), el = $('#pp'); if (!el) return;
+                var h = '<p>🌐 This world could support about <b style="color:var(--c)">' + fb(cap) + '</b> people.</p>';
+                h += '<div style="height:6px;border-radius:9px;background:rgba(255,255,255,.12);overflow:hidden"><div style="height:100%;width:' + Math.min(100, cap / 1.6e10 * 100) + '%;background:' + (cap >= 1e10 ? '#7dffb0' : cap >= now ? '#ffd166' : '#ff7b7b') + '"></div></div>';
+                h += '<p style="color:var(--m)">Real Earth today: about ' + fb(now) + ' people (rounded UN-based estimate). ' + (cap <= 0 ? 'Nobody could live here.' : 'Your world holds ' + (cap / now * 100).toFixed(0) + '% of that.') + '</p>';
+                h += '<div class="row"><button data-s="run">' + (sim && sim.on ? '⏸ Pause' : '▶ Run 100 years') + '</button><button data-s="rst">↺ Reset</button></div>';
+                if (sim) h += '<p><b>Year +' + sim.y + '</b> · ' + fb(sim.p) + (sim.p < 1e3 ? ' · 💀 extinct' : sim.p > cap * 1.02 ? ' · ⚠ overpopulated: famine' : '') + '</p>';
+                h += '<p style="color:var(--m)">🏆 Bonus: build a habitable world that can support 10 billion people (+50 XP)' + (E.done('pop10') ? ' ✓' : '') + '</p><p style="color:var(--m);font-size:11px">Simplified model: usable land × habitability. A teaching tool, not a forecast.</p>';
+                el.innerHTML = h;
+            }
+            function step() { if (!sim) return; var cap = capOf(calc()), p = sim.p; sim.y++; p = cap < 1e3 ? p * .8 : p + p * (p > cap ? .03 : .012) * (1 - p / cap); sim.p = Math.max(0, p); if (sim.y >= 100) sim.on = false; if (!sim.on) clearInterval(simT); popUI(calc()); }
+            ui.addEventListener('click', function (e) {
+                var b = e.target.closest('button[data-s]'); if (!b) return; clearInterval(simT);
+                if (b.dataset.s === 'rst') sim = null; else if (sim && sim.on) sim.on = false; else { if (!sim || sim.y >= 100) sim = { p: POP.now(), y: 0 }; sim.on = true; simT = setInterval(step, 150); }
+                popUI(calc());
+            });
+            var tt = 0;
+            function toast(m) { var t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(function () { t.classList.remove('on'); }, 3200); }
+            function load(k) { sim = null; clearInterval(simT); var p = PR[k]; chal = k === 'earth' ? null : k; lock = p.lock || []; setS(p); build(); refresh(false); }
 
-  ui.addEventListener('input', function (e) { var k = e.target.dataset.k; if (!k) return; S[k] = +e.target.value; refresh(true); });
-  ui.addEventListener('click', function (e) { var b = e.target.closest('button[data-p]'); if (b) load(b.dataset.p); });
-  load('earth');
-})();
-</script>
-<script src="script3.js" defer></script>
+            ui.addEventListener('input', function (e) { var k = e.target.dataset.k; if (!k) return; S[k] = +e.target.value; refresh(true); });
+            ui.addEventListener('click', function (e) { var b = e.target.closest('button[data-p]'); if (b) load(b.dataset.p); });
+            load('earth');
+        })();
+    </script>
+    <script src="script3.js" defer></script>
 </body>
+
 </html>
